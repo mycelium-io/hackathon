@@ -4,7 +4,7 @@ A static, single-page-ish site hosted on GitHub Pages that walks hackathon atten
 
 ## Goals
 
-1. **Train** — a guided slideshow that takes a new user from zero to a working Mycelium install with rooms, memory, and a session.
+1. **Try** — a guided slideshow that takes a new user from zero to a working Mycelium install with rooms, memory, and a session.
 2. **Survey** — collect structured feedback at the end (Likert + free-text + per-concept reactions).
 3. **Preview** — show 30-second teasers of future Mycelium experiences and capture reactions/comments per teaser.
 
