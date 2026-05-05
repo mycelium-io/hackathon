@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Install — Mycelium Hackathon</title>
+<link rel="stylesheet" href="styles/mycelium.css">
+<link rel="stylesheet" href="styles/site.css">
+</head>
+<body>
+<script src="js/chrome.js"></script>
+<script>renderChrome("install");</script>
+
+<div class="single-col-layout">
+  <main class="single-col-main">
+    <div class="main-inner">
+      <div class="slideshow">
+        <div id="slides"></div>
+
+        <div class="slide-controls">
+          <button class="slide-btn" id="prev-btn">← Prev</button>
+          <button class="slide-btn slide-btn-primary" id="next-btn">Next →</button>
+          <a href="survey.html" class="slide-btn slide-btn-primary" id="survey-btn" style="display:none; text-decoration:none;">Give feedback →</a>
+          <span class="slide-counter" id="slide-counter">— / —</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="pg-bar"></div>
+
+<script src="config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/slideshow.js"></script>
+</body>
+</html>

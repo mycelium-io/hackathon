@@ -1,0 +1,93 @@
+{
+  "install": [
+    {
+      "id": "01-overview",
+      "title": "What is Mycelium?",
+      "blurb": "A coordination layer for multi-agent systems — shared rooms, persistent memory, and structured negotiation.",
+      "video": "videos/install/01-overview.mp4",
+      "command": null
+    },
+    {
+      "id": "02-cli",
+      "title": "Install the CLI",
+      "blurb": "One curl gets you the mycelium binary on macOS or Linux. Python 3.12+ and Docker are required.",
+      "video": "videos/install/02-cli.mp4",
+      "command": "curl -fsSL https://mycelium-io.github.io/mycelium/install.sh | bash"
+    },
+    {
+      "id": "03-stack",
+      "title": "Bring up the stack",
+      "blurb": "mycelium install pulls images, prompts for your LLM provider, and brings up the backend + AgensGraph.",
+      "video": "videos/install/03-stack.mp4",
+      "command": "mycelium install"
+    },
+    {
+      "id": "04-room",
+      "title": "Create your first room",
+      "blurb": "Rooms are persistent coordination namespaces. Each one maps to a directory under ~/.mycelium/rooms/.",
+      "video": "videos/install/04-room.mp4",
+      "command": "mycelium room create my-project\nmycelium room use my-project"
+    },
+    {
+      "id": "05-memory",
+      "title": "Write a memory",
+      "blurb": "Every memory is a markdown file with YAML frontmatter, embedded for semantic search at write time.",
+      "video": "videos/install/05-memory.mp4",
+      "command": "mycelium memory set decisions/db \"PostgreSQL with pgvector\""
+    },
+    {
+      "id": "06-search",
+      "title": "Search by meaning",
+      "blurb": "Cosine similarity on local 384-dim embeddings — no API key, no external service.",
+      "video": "videos/install/06-search.mp4",
+      "command": "mycelium memory search \"what database decisions were made\""
+    },
+    {
+      "id": "07-catchup",
+      "title": "Catchup",
+      "blurb": "When a new agent joins a room, one command briefs it on everything the swarm has learned.",
+      "video": "videos/install/07-catchup.mp4",
+      "command": "mycelium catchup"
+    },
+    {
+      "id": "08-session",
+      "title": "Negotiate a plan",
+      "blurb": "Two agents join a session, propose, and converge on consensus mediated by the CognitiveEngine.",
+      "video": "videos/install/08-session.mp4",
+      "command": "mycelium session create -r my-project\nmycelium session join --handle me -m \"my position\" -r my-project\nmycelium session await --handle me -r my-project"
+    },
+    {
+      "id": "09-next",
+      "title": "Where to go next",
+      "blurb": "Read the docs, install an adapter, or join the community room.",
+      "video": "videos/install/09-next.mp4",
+      "command": null
+    }
+  ],
+  "preview": [
+    {
+      "id": "agent-mesh",
+      "title": "Agent Mesh",
+      "description": "Cross-org coordination — agents from different teams coordinate over a shared Mycelium hub without sharing infra.",
+      "video": "videos/preview/agent-mesh.mp4"
+    },
+    {
+      "id": "memory-replay",
+      "title": "Memory Replay",
+      "description": "Scrub through a room's history like a video timeline — see exactly when a decision was made and what context surrounded it.",
+      "video": "videos/preview/memory-replay.mp4"
+    },
+    {
+      "id": "auto-synthesis",
+      "title": "Continuous Synthesis",
+      "description": "Background synthesis that re-summarizes the room as new memories arrive, with diff highlighting on what changed.",
+      "video": "videos/preview/auto-synthesis.mp4"
+    },
+    {
+      "id": "graph-explorer",
+      "title": "Knowledge Graph Explorer",
+      "description": "Interactive openCypher graph view — click any concept to see its neighbors, decisions, and trade-offs.",
+      "video": "videos/preview/graph-explorer.mp4"
+    }
+  ]
+}
