@@ -47,15 +47,14 @@ function escapeHtml(s) {
 
 function render() {
   const container = document.getElementById("slides");
-  const counter = document.getElementById("slide-counter");
   const prevBtn = document.getElementById("prev-btn");
   const nextBtn = document.getElementById("next-btn");
-  const surveyBtn = document.getElementById("survey-btn");
 
   container.innerHTML = "";
   steps.forEach((step, i) => {
     const slide = document.createElement("div");
     slide.className = "slide" + (i === current ? " active" : "");
+    const isLast = i === steps.length - 1;
     slide.innerHTML = `
       <div class="slide-step-label">Step ${i + 1} of ${steps.length}</div>
       <h1 class="slide-title">${escapeHtml(step.title)}</h1>
@@ -67,14 +66,13 @@ function render() {
           ? `<pre class="slide-cmd-block"><code>${highlightCmd(step.command)}</code></pre>`
           : ""
       }
+      ${isLast ? '<a class="slide-cta" href="survey.html">Give feedback →</a>' : ""}
     `;
     container.appendChild(slide);
   });
 
-  counter.textContent = `${current + 1} / ${steps.length}`;
   prevBtn.disabled = current === 0;
   nextBtn.disabled = current === steps.length - 1;
-  surveyBtn.style.display = current === steps.length - 1 ? "inline-block" : "none";
 
   const pct = ((current + 1) / steps.length) * 100;
   document.getElementById("pg-bar").style.width = pct + "%";

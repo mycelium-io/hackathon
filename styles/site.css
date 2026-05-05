@@ -73,50 +73,67 @@
   margin: 0;
 }
 
-/* ── Slideshow controls ── */
-.slide-controls {
+/* ── Slideshow side arrows ── */
+.slide-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(20, 22, 27, 0.6);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
+  justify-content: center;
+  z-index: 90;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s;
 }
-
-.slide-btn {
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  font-size: 13px;
-  font-family: 'SF Mono', monospace;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
-}
-.slide-btn:hover:not(:disabled) {
+.slide-arrow:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent);
+  background: rgba(56, 189, 248, 0.1);
+  transform: translateY(-50%) scale(1.06);
 }
-.slide-btn:disabled {
-  opacity: 0.35;
+.slide-arrow:disabled {
+  opacity: 0.25;
   cursor: not-allowed;
 }
-.slide-btn-primary {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: rgba(56, 189, 248, 0.06);
-}
-.slide-btn-primary:hover:not(:disabled) {
-  background: rgba(56, 189, 248, 0.12);
+.slide-arrow-prev { left: 24px; }
+.slide-arrow-next { right: 24px; }
+
+@media (max-width: 720px) {
+  .slide-arrow {
+    width: 44px;
+    height: 44px;
+  }
+  .slide-arrow-prev { left: 8px; }
+  .slide-arrow-next { right: 8px; }
 }
 
-.slide-counter {
-  margin-left: auto;
-  font-size: 12px;
+/* ── End-of-slideshow CTA ── */
+.slide-cta {
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 12px 22px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  color: var(--accent);
   font-family: 'SF Mono', monospace;
-  color: var(--muted);
-  letter-spacing: 0.1em;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.slide-cta:hover {
+  background: rgba(56, 189, 248, 0.16);
+  text-decoration: none;
 }
 
 /* ── Bottom progress bar (mirrors stories.html) ── */

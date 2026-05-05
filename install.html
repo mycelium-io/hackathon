@@ -17,17 +17,21 @@
     <div class="main-inner">
       <div class="slideshow">
         <div id="slides"></div>
-
-        <div class="slide-controls">
-          <button class="slide-btn" id="prev-btn">← Prev</button>
-          <button class="slide-btn slide-btn-primary" id="next-btn">Next →</button>
-          <a href="survey.html" class="slide-btn slide-btn-primary" id="survey-btn" style="display:none; text-decoration:none;">Give feedback →</a>
-          <span class="slide-counter" id="slide-counter">— / —</span>
-        </div>
       </div>
     </div>
   </main>
 </div>
+
+<button class="slide-arrow slide-arrow-prev" id="prev-btn" aria-label="Previous step">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="15 18 9 12 15 6"></polyline>
+  </svg>
+</button>
+<button class="slide-arrow slide-arrow-next" id="next-btn" aria-label="Next step">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="9 18 15 12 9 6"></polyline>
+  </svg>
+</button>
 
 <div id="pg-bar"></div>
 
