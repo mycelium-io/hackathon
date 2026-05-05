@@ -1,66 +1,59 @@
 {
   "install": [
     {
-      "id": "01-overview",
-      "title": "What is Mycelium?",
-      "blurb": "A coordination layer for multi-agent systems — shared rooms, persistent memory, and structured negotiation.",
-      "video": "videos/install/01-overview.mp4",
-      "command": null
-    },
-    {
-      "id": "02-cli",
+      "id": "01-cli",
       "title": "Install the CLI",
       "blurb": "One curl gets you the mycelium binary on macOS or Linux. Python 3.12+ and Docker are required.",
-      "video": "videos/install/02-cli.mp4",
+      "video": "videos/install/01-cli.mp4",
       "command": "curl -fsSL https://mycelium-io.github.io/mycelium/install.sh | bash"
     },
     {
-      "id": "03-stack",
+      "id": "02-stack",
       "title": "Bring up the stack",
       "blurb": "mycelium install pulls images, prompts for your LLM provider, and brings up the backend + AgensGraph.",
-      "video": "videos/install/03-stack.mp4",
+      "video": "videos/install/02-stack.mp4",
       "command": "mycelium install"
     },
     {
-      "id": "04-room",
+      "id": "03-room",
       "title": "Create your first room",
       "blurb": "Rooms are persistent coordination namespaces. Each one maps to a directory under ~/.mycelium/rooms/.",
-      "video": "videos/install/04-room.mp4",
+      "video": "videos/install/03-room.mp4",
       "command": "mycelium room create my-project\nmycelium room use my-project"
     },
     {
-      "id": "05-memory",
+      "id": "04-memory",
       "title": "Write a memory",
       "blurb": "Every memory is a markdown file with YAML frontmatter, embedded for semantic search at write time.",
-      "video": "videos/install/05-memory.mp4",
+      "video": "videos/install/04-memory.mp4",
       "command": "mycelium memory set decisions/db \"PostgreSQL with pgvector\""
     },
     {
-      "id": "06-search",
+      "id": "05-search",
       "title": "Search by meaning",
       "blurb": "Cosine similarity on local 384-dim embeddings — no API key, no external service.",
-      "video": "videos/install/06-search.mp4",
+      "video": "videos/install/05-search.mp4",
       "command": "mycelium memory search \"what database decisions were made\""
     },
     {
-      "id": "07-catchup",
+      "id": "06-catchup",
       "title": "Catchup",
       "blurb": "When a new agent joins a room, one command briefs it on everything the swarm has learned.",
-      "video": "videos/install/07-catchup.mp4",
+      "video": "videos/install/06-catchup.mp4",
       "command": "mycelium catchup"
     },
     {
-      "id": "08-session",
+      "id": "07-session",
       "title": "Negotiate a plan",
       "blurb": "Two agents join a session, propose, and converge on consensus mediated by the CognitiveEngine.",
-      "video": "videos/install/08-session.mp4",
+      "video": "videos/install/07-session.mp4",
       "command": "mycelium session create -r my-project\nmycelium session join --handle me -m \"my position\" -r my-project\nmycelium session await --handle me -r my-project"
     },
     {
-      "id": "09-next",
+      "id": "08-next",
       "title": "Where to go next",
       "blurb": "Read the docs, install an adapter, or join the community room.",
-      "video": "videos/install/09-next.mp4",
+      "video": "videos/install/08-next.mp4",
       "command": null
     }
   ],
