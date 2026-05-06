@@ -59,7 +59,7 @@ function render() {
       <div class="slide-step-label">Step ${i + 1} of ${steps.length}</div>
       <h1 class="slide-title">${escapeHtml(step.title)}</h1>
       <p class="slide-blurb">${escapeHtml(step.blurb)}</p>
-      <video class="slide-video" src="${step.video}" controls preload="metadata" muted playsinline
+      <video class="slide-video" src="${step.video}" controls autoplay muted playsinline preload="metadata"
              onerror="this.classList.add('placeholder'); this.outerHTML = '<div class=&quot;slide-video placeholder&quot;>video placeholder — ${escapeHtml(step.id)}.mp4</div>';"></video>
       ${
         step.command
@@ -76,6 +76,21 @@ function render() {
 
   const pct = ((current + 1) / steps.length) * 100;
   document.getElementById("pg-bar").style.width = pct + "%";
+
+  // Autoplay only the active slide's video. Pause + rewind everyone else
+  // so when a slide is revisited it starts from the top.
+  container.querySelectorAll(".slide").forEach((slide, i) => {
+    const video = slide.querySelector("video");
+    if (!video) return;
+    if (i === current) {
+      video.currentTime = 0;
+      // play() may reject on first interaction; ignore — autoplay attr handles initial.
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+      video.currentTime = 0;
+    }
+  });
 
   persist();
 }

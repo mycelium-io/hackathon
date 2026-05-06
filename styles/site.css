@@ -103,8 +103,14 @@
   opacity: 0.25;
   cursor: not-allowed;
 }
-.slide-arrow-prev { left: 24px; }
-.slide-arrow-next { right: 24px; }
+/* Anchor arrows to the card edge, not the viewport edge.
+   Card max-width is 90ch (set on .single-col-main), so the card's edge sits
+   at ~ (50vw ± 45ch). Arrows sit 40px outside the card edge (16px gap +
+   56px arrow width on the prev side; mirror with `right` on next). On
+   narrow viewports the calc goes negative and the max() clamp pins them
+   to 16px from the screen edge. */
+.slide-arrow-prev { left: max(16px, calc(50vw - 45ch - 40px)); }
+.slide-arrow-next { right: max(16px, calc(50vw - 45ch - 40px)); }
 
 @media (max-width: 720px) {
   .slide-arrow {
@@ -468,10 +474,12 @@
 }
 .single-col-main {
   flex: 1;
+  min-width: 0;            /* let flex child shrink below content min-content */
   max-width: 90ch;
   padding: 56px 32px 100px;
 }
 .single-col-main .main-inner {
+  min-width: 0;
   background: rgba(12, 13, 16, 0.6);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
