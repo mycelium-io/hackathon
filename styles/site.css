@@ -73,17 +73,18 @@
   margin: 0;
 }
 
-/* ── Slideshow side arrows ── */
+/* ── Slideshow side arrows ──
+   High-contrast by default so first-time visitors can find them. */
 .slide-arrow {
   position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  width: 56px;
-  height: 56px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  background: rgba(20, 22, 27, 0.6);
-  border: 1px solid var(--border);
-  color: var(--muted);
+  background: rgba(56, 189, 248, 0.16);
+  border: 2px solid var(--accent);
+  color: var(--accent);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -91,16 +92,25 @@
   z-index: 90;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.08), 0 8px 24px rgba(0, 0, 0, 0.5);
+  transition: background 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
 }
+.slide-arrow svg { width: 26px; height: 26px; stroke-width: 2.5; }
 .slide-arrow:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: rgba(56, 189, 248, 0.1);
-  transform: translateY(-50%) scale(1.06);
+  background: var(--accent);
+  color: var(--bg);
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.18), 0 12px 32px rgba(0, 0, 0, 0.6);
+}
+.slide-arrow:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.96);
 }
 .slide-arrow:disabled {
-  opacity: 0.25;
+  background: rgba(20, 22, 27, 0.4);
+  border-color: var(--border2);
+  color: var(--muted);
+  box-shadow: none;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 /* Anchor arrows to the card edge, not the viewport edge.
