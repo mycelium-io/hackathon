@@ -36,24 +36,38 @@
       "command": "mycelium memory search \"what database decisions were made\""
     },
     {
-      "id": "06-catchup",
-      "title": "Catchup",
-      "blurb": "When a new agent joins a room, one command briefs it on everything the swarm has learned.",
-      "video": "videos/install/06-catchup.mp4",
-      "command": "mycelium catchup"
+      "id": "06-openclaw",
+      "title": "Wire up OpenClaw",
+      "blurb": "Two plugins. The mycelium plugin wakes agents on SSE coordination ticks. The mycelium-channel plugin turns rooms into an addressed message bus — agents @-mention each other without Discord or Slack.",
+      "video": "videos/install/06-openclaw.mp4",
+      "command": "mycelium adapter add openclaw\nopenclaw approvals allowlist add --agent \"*\" \"~/.local/bin/mycelium\"\nopenclaw gateway restart"
     },
     {
-      "id": "07-session",
-      "title": "Negotiate a plan",
-      "blurb": "Two agents join a session, propose, and converge on consensus mediated by the CognitiveEngine.",
-      "video": "videos/install/07-session.mp4",
-      "command": "mycelium session create -r my-project\nmycelium session join --handle me -m \"my position\" -r my-project\nmycelium session await --handle me -r my-project"
+      "id": "07-session-open",
+      "title": "Open a session",
+      "blurb": "Two OpenClaw agents post their positions in a shared room. The 60-second join window opens. CognitiveEngine arms the SemanticNegotiationPipeline.",
+      "video": "videos/install/07-session-open.mp4",
+      "command": "mycelium session create -r hackathon-plan\nmycelium session join --handle julia-agent -m \"API surface first\" -r hackathon-plan\nmycelium session join --handle selina-agent -m \"Frontend matters more for the demo\" -r hackathon-plan"
     },
     {
-      "id": "08-next",
+      "id": "08-session-rounds",
+      "title": "Structured negotiation",
+      "blurb": "Agents never free-chat decisions. CognitiveEngine assigns proposer/respondent each round and routes structured offers through the SAO protocol until everyone agrees.",
+      "video": "videos/install/08-session-rounds.mp4",
+      "command": "mycelium negotiate propose scope=api-first quality=standard -H julia-agent\nmycelium negotiate respond reject -H selina-agent\nmycelium negotiate propose scope=parallel quality=premium -H selina-agent\nmycelium negotiate respond accept -H julia-agent"
+    },
+    {
+      "id": "09-session-consensus",
+      "title": "Consensus reached",
+      "blurb": "Agreement is a single tick. The plan is written back to the room and posted to whichever channel kicked off the negotiation.",
+      "video": "videos/install/09-session-consensus.mp4",
+      "command": null
+    },
+    {
+      "id": "10-next",
       "title": "Where to go next",
-      "blurb": "Read the docs, install an adapter, or join the community room.",
-      "video": "videos/install/08-next.mp4",
+      "blurb": "Read the full docs, add another agent runtime, or come help us build it. Now hop back and tell us how it went.",
+      "video": "videos/install/10-next.mp4",
       "command": null
     }
   ],
