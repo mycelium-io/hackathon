@@ -8,7 +8,7 @@ const CONCEPTS = [
   { id: "knowledge_graph", label: "Knowledge Graph" },
 ];
 
-function buildLikert(name, min, max, labels) {
+function buildLikert(name, min, max, labels, modifier = "") {
   const opts = [];
   for (let i = min; i <= max; i++) {
     opts.push(
@@ -16,7 +16,7 @@ function buildLikert(name, min, max, labels) {
     );
   }
   return `
-    <div class="likert">${opts.join("")}</div>
+    <div class="likert ${modifier}">${opts.join("")}</div>
     <div class="likert-scale-labels">
       <span>${labels[0]}</span>
       <span>${labels[1]}</span>
@@ -53,7 +53,7 @@ function renderSurvey() {
         <h2>Overall</h2>
         <div class="survey-section-blurb">How likely are you to recommend Mycelium to a colleague?</div>
         <div class="survey-field">
-          ${buildLikert("nps", 0, 10, ["Not at all (0)", "Definitely (10)"])}
+          ${buildLikert("nps", 0, 10, ["Not at all (0)", "Definitely (10)"], "likert-nps")}
         </div>
         <div class="survey-field">
           <label for="overall_text">What stood out — good or bad?</label>

@@ -158,87 +158,123 @@
 .survey-form {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 56px;                /* breathing room between sections */
   max-width: 70ch;
 }
 
+.survey-section {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;                /* breathing room between fields within a section */
+}
+
 .survey-section h2 {
-  margin-top: 0;
-  margin-bottom: 6px;
+  margin: 0 0 8px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.375rem;
 }
 .survey-section .survey-section-blurb {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--muted);
-  margin-bottom: 16px;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .survey-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 10px;
 }
 
 .survey-field label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text);
+  letter-spacing: 0.01em;
 }
 
 .survey-field .hint {
   font-size: 12px;
   color: var(--muted);
+  margin-top: 2px;
 }
 
 .survey-input,
 .survey-textarea {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   color: var(--text);
   font-family: inherit;
-  font-size: 14px;
-  padding: 10px 12px;
+  font-size: 15px;
+  padding: 12px 14px;
   width: 100%;
+  transition: border-color 0.15s, background 0.15s;
+}
+.survey-input:hover,
+.survey-textarea:hover {
+  border-color: var(--border2);
 }
 .survey-input:focus,
 .survey-textarea:focus {
   outline: none;
   border-color: var(--accent);
+  background: rgba(56, 189, 248, 0.03);
 }
 .survey-textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 90px;
+  line-height: 1.5;
   font-family: 'IBM Plex Sans', sans-serif;
 }
 
+/* Grid-based Likert — every cell is equal width, no orphans stretching.
+   auto-fit + minmax(56px, 1fr) means cells fit as many per row as they
+   can, then wrap into more rows; each cell stays 1fr regardless. */
 .likert {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+  gap: 8px;
 }
 .likert-option {
-  flex: 1;
-  min-width: 60px;
   text-align: center;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 6px;
+  border-radius: 8px;
+  padding: 14px 4px;
   background: var(--card);
   color: var(--muted);
   cursor: pointer;
   font-family: 'SF Mono', monospace;
-  font-size: 13px;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  font-size: 14px;
+  font-weight: 600;
+  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.1s;
 }
 .likert-option:hover {
   border-color: var(--border2);
   color: var(--text);
+  background: rgba(255, 255, 255, 0.02);
 }
+.likert-option:active { transform: scale(0.97); }
 .likert-option.selected {
   border-color: var(--accent);
   color: var(--accent);
   background: rgba(56, 189, 248, 0.08);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* NPS — 11 cells, force a single row, smaller buttons. */
+.likert.likert-nps {
+  grid-template-columns: repeat(11, 1fr);
+  gap: 4px;
+}
+.likert.likert-nps .likert-option {
+  padding: 12px 2px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+@media (max-width: 480px) {
+  .likert.likert-nps .likert-option { padding: 10px 1px; font-size: 12px; }
 }
 
 .likert-scale-labels {
@@ -254,24 +290,33 @@
 .consent {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 14px 16px;
-  background: rgba(192, 132, 252, 0.04);
-  border: 1px solid rgba(192, 132, 252, 0.18);
-  border-radius: 8px;
-  font-size: 13px;
+  gap: 14px;
+  padding: 18px 20px;
+  background: rgba(192, 132, 252, 0.05);
+  border: 1px solid rgba(192, 132, 252, 0.22);
+  border-radius: 10px;
+  font-size: 14px;
   color: var(--text2);
-  line-height: 1.55;
+  line-height: 1.6;
+  cursor: pointer;
 }
 .consent input[type="checkbox"] {
-  margin-top: 3px;
+  margin-top: 4px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--purple);
+  cursor: pointer;
 }
 
 .submit-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-top: 12px;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
 }
 
 .submit-btn {
@@ -282,14 +327,15 @@
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.05em;
-  padding: 12px 24px;
+  padding: 14px 28px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.1s;
 }
 .submit-btn:hover:not(:disabled) {
   background: rgba(56, 189, 248, 0.16);
 }
+.submit-btn:active:not(:disabled) { transform: scale(0.98); }
 .submit-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
