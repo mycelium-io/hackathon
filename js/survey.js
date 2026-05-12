@@ -106,16 +106,58 @@ function renderSurvey() {
 
       <div id="turnstile-container"></div>
 
-      <div class="submit-row">
-        <button type="submit" class="submit-btn" id="submit-btn">Submit feedback</button>
-        <span class="form-status" id="form-status"></span>
+      <div class="survey-nav">
+        <button type="button" class="survey-back" id="survey-back">← Back</button>
+        <div class="survey-progress" id="survey-progress"></div>
+        <button type="button" class="survey-next" id="survey-next">Continue →</button>
+        <button type="submit" class="submit-btn" id="submit-btn" hidden>Submit feedback</button>
       </div>
+      <span class="form-status" id="form-status"></span>
     </form>
   `;
 
   attachLikertHandlers();
   document.getElementById("survey-form").addEventListener("submit", onSubmit);
+  initProgressive();
   mountTurnstile();
+}
+
+let currentStep = 0;
+let totalSteps = 0;
+
+function initProgressive() {
+  const sections = document.querySelectorAll(".survey-section");
+  totalSteps = sections.length;
+  sections.forEach((s, i) => {
+    s.dataset.step = i;
+    s.hidden = i !== 0;
+  });
+  document.getElementById("survey-back").addEventListener("click", () => goStep(currentStep - 1));
+  document.getElementById("survey-next").addEventListener("click", () => goStep(currentStep + 1));
+  updateNav();
+}
+
+function goStep(n) {
+  if (n < 0 || n >= totalSteps) return;
+  document.querySelectorAll(".survey-section").forEach((s) => {
+    s.hidden = parseInt(s.dataset.step, 10) !== n;
+  });
+  currentStep = n;
+  updateNav();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function updateNav() {
+  const back = document.getElementById("survey-back");
+  const next = document.getElementById("survey-next");
+  const submit = document.getElementById("submit-btn");
+  const progress = document.getElementById("survey-progress");
+  const isLast = currentStep === totalSteps - 1;
+  back.hidden = currentStep === 0;
+  next.hidden = isLast;
+  submit.hidden = !isLast;
+  progress.textContent = `Step ${currentStep + 1} of ${totalSteps}`;
+  document.getElementById("turnstile-container").hidden = !isLast;
 }
 
 let turnstileToken = "";

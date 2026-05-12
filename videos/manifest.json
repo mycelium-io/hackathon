@@ -73,6 +73,12 @@
   ],
   "preview": [
     {
+      "id": "graph-explorer",
+      "title": "Knowledge Graph Explorer",
+      "description": "Search across concepts, see how decisions and failures relate, dive into the details. Your room's knowledge as an interactive graph.",
+      "video": "videos/preview/graph-explorer.mp4"
+    },
+    {
       "id": "agent-mesh",
       "title": "Agent Mesh",
       "description": "Cross-org coordination — agents from different teams coordinate over a shared Mycelium hub without sharing infra.",
@@ -89,12 +95,6 @@
       "title": "Continuous Synthesis",
       "description": "Background synthesis that re-summarizes the room as new memories arrive, with diff highlighting on what changed.",
       "video": "videos/preview/auto-synthesis.mp4"
-    },
-    {
-      "id": "graph-explorer",
-      "title": "Knowledge Graph Explorer",
-      "description": "Interactive openCypher graph view — click any concept to see its neighbors, decisions, and trade-offs.",
-      "video": "videos/preview/graph-explorer.mp4"
     }
   ]
 }

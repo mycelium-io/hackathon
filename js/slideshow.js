@@ -66,9 +66,23 @@ function render() {
           ? `<pre class="slide-cmd-block"><code>${highlightCmd(step.command)}</code></pre>`
           : ""
       }
+      <details class="slide-stuck">
+        <summary>Stuck? Give feedback</summary>
+        <form class="slide-stuck-form" data-step-id="${escapeHtml(step.id)}" data-step-index="${i}">
+          <textarea class="slide-stuck-text" name="text" placeholder="What's not working, what's confusing, what would you change?" required></textarea>
+          <div class="slide-stuck-row">
+            <button type="submit" class="slide-stuck-submit">Send</button>
+            <span class="slide-stuck-status"></span>
+          </div>
+        </form>
+      </details>
       ${isLast ? '<a class="slide-cta" href="survey.html">Give feedback →</a>' : ""}
     `;
     container.appendChild(slide);
+  });
+
+  container.querySelectorAll(".slide-stuck-form").forEach((form) => {
+    form.addEventListener("submit", onStuckSubmit);
   });
 
   prevBtn.disabled = current === 0;
@@ -107,6 +121,44 @@ function prev() {
     current--;
     render();
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
+async function onStuckSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const status = form.querySelector(".slide-stuck-status");
+  const btn = form.querySelector(".slide-stuck-submit");
+  const text = form.querySelector(".slide-stuck-text").value.trim();
+  if (!text) return;
+
+  btn.disabled = true;
+  status.textContent = "Sending…";
+  status.className = "slide-stuck-status";
+
+  try {
+    const res = await window.MyceliumApi.postToApi({
+      kind: "install_stuck",
+      payload: {
+        step_id: form.dataset.stepId,
+        step_index: parseInt(form.dataset.stepIndex, 10),
+        text,
+      },
+    });
+    if (res.ok === false && res.reason === "not_configured") {
+      status.textContent = "Sent (dev mode — see console).";
+      status.className = "slide-stuck-status success";
+    } else if (res.ok) {
+      status.textContent = "Thanks — got it.";
+      status.className = "slide-stuck-status success";
+      form.querySelector(".slide-stuck-text").value = "";
+    } else {
+      throw new Error(res.error || "unknown");
+    }
+  } catch (err) {
+    status.textContent = "Send failed: " + err.message;
+    status.className = "slide-stuck-status error";
+    btn.disabled = false;
   }
 }
 

@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Sketch · Graph Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,600&family=IBM+Plex+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0c0d10; --surface: #111216; --paper: #14161b;
+    --border: rgba(234,234,234,0.10);
+    --border2: rgba(234,234,234,0.22);
+    --accent: #5dd4e0; --accent2: #7dd3fc;
+    --green: #34d399; --purple: #c084fc; --blue: #818cf8; --yellow: #fbbf24; --red: #f87171;
+    --text: #eaeaea; --text2: #a8a6a0; --muted: #b8b5ae; --dim: #46443e;
+  }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    overflow: hidden;
+  }
+
+  /* ── Layout ── */
+  .stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Background grid (subtle, for depth) ── */
+  .grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(234,234,234,0.04) 1px, transparent 0);
+    background-size: 32px 32px;
+    z-index: 0;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    position: absolute;
+    top: 24px; left: 24px; right: 24px;
+    display: flex; align-items: center; gap: 16px;
+    z-index: 10;
+  }
+  .search {
+    flex: 0 0 380px;
+    background: rgba(20, 22, 27, 0.92);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .search svg { stroke: var(--muted); }
+  .search input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-family: inherit; font-size: 15px;
+  }
+  .search input::placeholder { color: var(--muted); }
+  .search .kbd {
+    font-family: 'Geist Mono', monospace; font-size: 11px;
+    color: var(--muted); padding: 2px 8px;
+    border: 1px solid var(--border2); border-radius: 4px;
+  }
+
+  /* ── Typeahead dropdown ── */
+  .typeahead {
+    position: absolute;
+    top: 76px; left: 24px;
+    width: 380px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: rgba(20, 22, 27, 0.96);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 11;
+    padding: 6px;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .typeahead.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .ta-section-label {
+    font-family: 'Geist Mono', monospace; font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 14px 6px;
+  }
+  .ta-item {
+    display: grid;
+    grid-template-columns: 10px auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .ta-item:hover, .ta-item.focused {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .ta-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .ta-item[data-kind="decisions"] .ta-dot { background: var(--accent); }
+  .ta-item[data-kind="failed"]    .ta-dot { background: var(--red); }
+  .ta-item[data-kind="work"]      .ta-dot { background: var(--blue); }
+  .ta-item[data-kind="status"]    .ta-dot { background: var(--green); }
+  .ta-item[data-kind="context"]   .ta-dot { background: var(--purple); }
+  .ta-key {
+    font-family: 'Geist Mono', monospace;
+    font-size: 14px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .ta-key .ns { color: var(--muted); }
+  .ta-key mark {
+    background: rgba(93, 212, 224, 0.22);
+    color: var(--accent);
+    padding: 0;
+  }
+  .ta-label {
+    font-size: 13px;
+    color: var(--text2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ta-label mark {
+    background: rgba(93, 212, 224, 0.22);
+    color: var(--accent);
+    padding: 0;
+  }
+  .ta-kind {
+    font-family: 'Geist Mono', monospace; font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .ta-empty {
+    padding: 18px 14px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+  }
+  .breadcrumb {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'Geist Mono', monospace; font-size: 12px;
+    color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .breadcrumb .room { color: var(--accent); }
+  .breadcrumb .count { color: var(--text); }
+
+  /* ── Graph ── */
+  .graph {
+    position: absolute; inset: 0;
+    z-index: 1;
+  }
+  .graph svg { width: 100%; height: 100%; }
+
+  .edge {
+    stroke: rgba(168, 166, 160, 0.16);
+    stroke-width: 1.2;
+    transition: stroke 0.2s, stroke-width 0.2s, opacity 0.2s;
+  }
+  .edge.hot {
+    stroke: rgba(168, 166, 160, 0.55);
+    stroke-width: 1.6;
+  }
+  .edge-label-g { opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .edge-label-g.visible { opacity: 1; }
+  .edge-label-bg { fill: var(--bg); }
+  .edge-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    fill: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+
+  .node-g { cursor: pointer; }
+  .node-g .node-bg {
+    fill: var(--surface);
+    stroke: var(--border2);
+    stroke-width: 1.5;
+    transition: fill 0.2s, stroke 0.2s, stroke-width 0.2s;
+  }
+  .node-g .node-label {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    fill: var(--text2);
+    pointer-events: none;
+    transition: fill 0.2s;
+  }
+  .node-g .node-ns {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    fill: var(--muted);
+    pointer-events: none;
+  }
+  .node-g.decisions .node-bg { stroke: var(--accent); }
+  .node-g.failed    .node-bg { stroke: var(--red); }
+  .node-g.work      .node-bg { stroke: var(--blue); }
+  .node-g.status    .node-bg { stroke: var(--green); }
+  .node-g.context   .node-bg { stroke: var(--purple); }
+
+  .node-g:hover .node-bg { stroke-width: 2.5; }
+  .node-g:hover .node-label { fill: var(--text); }
+
+  .node-g.selected .node-bg { stroke-width: 2.5; }
+  .node-g.selected .node-label { fill: var(--text); font-weight: 600; }
+
+  .node-g.dim .node-bg { opacity: 0.3; }
+  .node-g.dim .node-label,
+  .node-g.dim .node-ns { opacity: 0.3; }
+  .edge.dim { opacity: 0.18; }
+
+  /* ── Detail card (right rail) ── */
+  .detail {
+    position: absolute;
+    top: 24px; right: 24px; bottom: 24px;
+    width: 580px;
+    background: rgba(20, 22, 27, 0.96);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    overflow: hidden;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column;
+    z-index: 20;
+    transform: translateX(0);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .detail.hidden { transform: translateX(110%); opacity: 0; pointer-events: none; }
+
+  .detail-header {
+    padding: 24px 28px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .detail-pill {
+    font-family: 'Geist Mono', monospace; font-size: 13px;
+    padding: 4px 12px; border-radius: 5px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    font-weight: 600;
+  }
+  .detail-pill.decisions { background: rgba(93,212,224,0.1); color: var(--accent); border: 1px solid rgba(93,212,224,0.3); }
+  .detail-pill.failed    { background: rgba(248,113,113,0.1); color: var(--red);    border: 1px solid rgba(248,113,113,0.3); }
+  .detail-pill.work      { background: rgba(129,140,248,0.1); color: var(--blue);   border: 1px solid rgba(129,140,248,0.3); }
+  .detail-pill.status    { background: rgba(52,211,153,0.1);  color: var(--green);  border: 1px solid rgba(52,211,153,0.3); }
+  .detail-pill.context   { background: rgba(192,132,252,0.1); color: var(--purple); border: 1px solid rgba(192,132,252,0.3); }
+
+  .detail-close {
+    margin-left: auto;
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); padding: 6px;
+    border-radius: 6px;
+  }
+  .detail-close svg { width: 20px; height: 20px; }
+  .detail-close:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+  .detail-key {
+    padding: 18px 28px 6px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 28px;
+    color: var(--text);
+    word-break: break-all;
+    letter-spacing: 0.01em;
+  }
+  .detail-key .ns { color: var(--muted); }
+
+  .detail-meta {
+    padding: 0 28px 22px;
+    font-family: 'Geist Mono', monospace; font-size: 14px;
+    color: var(--muted); letter-spacing: 0.06em;
+    display: flex; gap: 22px; flex-wrap: wrap;
+  }
+  .detail-meta .item { display: flex; align-items: baseline; gap: 6px; }
+  .detail-meta .item .v { color: var(--text); }
+
+  .detail-body {
+    flex: 1;
+    padding: 22px 28px;
+    overflow-y: auto;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text2);
+    border-top: 1px solid var(--border);
+  }
+
+  .detail-section {
+    margin-bottom: 28px;
+  }
+  .detail-section h4 {
+    font-family: 'Geist Mono', monospace; font-size: 13px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px; font-weight: 600;
+  }
+  .detail-body p { color: var(--text); margin-bottom: 8px; font-size: 16px; }
+
+  .connections {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .conn {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.015);
+    font-family: 'Geist Mono', monospace; font-size: 15px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .conn:hover { border-color: var(--border2); background: rgba(255,255,255,0.04); }
+  .conn .arrow {
+    font-family: 'Geist Mono', monospace; color: var(--muted); font-size: 13px;
+    padding: 3px 8px; background: rgba(255,255,255,0.04);
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+  .conn .target { color: var(--text); }
+  .conn .target .ns { color: var(--muted); }
+  .conn .dot {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .conn[data-kind="decisions"] .dot { background: var(--accent); }
+  .conn[data-kind="failed"]    .dot { background: var(--red); }
+  .conn[data-kind="work"]      .dot { background: var(--blue); }
+  .conn[data-kind="status"]    .dot { background: var(--green); }
+  .conn[data-kind="context"]   .dot { background: var(--purple); }
+
+  .tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tag {
+    font-family: 'Geist Mono', monospace; font-size: 13px;
+    padding: 5px 11px; border-radius: 5px;
+    background: rgba(255,255,255,0.04);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+
+  /* ── Footer hint ── */
+  .hint {
+    position: absolute; left: 24px; bottom: 24px;
+    font-family: 'Geist Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase;
+    z-index: 10;
+  }
+  .hint .kbd {
+    color: var(--text); padding: 2px 8px;
+    border: 1px solid var(--border2); border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid-bg"></div>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+      <input type="text" id="ta-input" placeholder="search concepts, decisions, failures…" autocomplete="off" />
+      <span class="kbd">⌘ K</span>
+    </div>
+    <div class="typeahead" id="typeahead"></div>
+    <div class="breadcrumb">
+      <span class="room">#hackathon-plan</span>
+      <span>·</span>
+      <span class="count">8 nodes · 11 edges</span>
+    </div>
+  </div>
+
+  <!-- Graph (SVG) -->
+  <div class="graph">
+    <svg viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid meet">
+      <g id="edges"></g>
+      <g id="edge-labels"></g>
+      <g id="nodes"></g>
+    </svg>
+  </div>
+
+  <!-- Detail card -->
+  <aside class="detail" id="detail">
+    <div class="detail-header">
+      <span class="detail-pill decisions" id="d-pill">DECISION</span>
+      <button class="detail-close" id="d-close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="detail-key" id="d-key"><span class="ns">decisions/</span>db</div>
+    <div class="detail-meta">
+      <span class="item">v<span class="v" id="d-version">2</span></span>
+      <span class="item">by <span class="v" id="d-author">julia-agent</span></span>
+      <span class="item">updated <span class="v" id="d-updated">2026-05-03</span></span>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <h4>Content</h4>
+        <p id="d-content">PostgreSQL with pgvector — single AgensGraph instance, SQL + graph + vector in one DB. Eliminates the need for a separate vector store; embeddings sit alongside the relational tables they describe.</p>
+      </div>
+      <div class="detail-section">
+        <h4>Connections · 4</h4>
+        <div class="connections" id="d-connections">
+          <div class="conn" data-kind="decisions"><span class="dot"></span><span class="arrow">RESOLVES</span><span class="target"><span class="ns">failed/</span>sqlite</span></div>
+          <div class="conn" data-kind="decisions"><span class="dot"></span><span class="arrow">SUPPORTS</span><span class="target"><span class="ns">work/</span>migration</span></div>
+          <div class="conn" data-kind="status"><span class="dot"></span><span class="arrow">ENABLES</span><span class="target"><span class="ns">status/</span>api</span></div>
+          <div class="conn" data-kind="context"><span class="dot"></span><span class="arrow">CONSTRAINS</span><span class="target"><span class="ns">context/</span>constraints</span></div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h4>Concepts</h4>
+        <div class="tags">
+          <span class="tag">pgvector</span>
+          <span class="tag">postgres</span>
+          <span class="tag">embeddings</span>
+          <span class="tag">cosine-similarity</span>
+          <span class="tag">agensgraph</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="hint">click a node to inspect · <span class="kbd">esc</span> to close</div>
+</div>
+
+<script>
+  // ── Data ──
+  // Bigger, fewer concepts — each node represents a meaningful idea, not a leaf.
+  const NODES = [
+    { id: 'goal',     kind: 'context',   key: 'context/goal',         x: 700, y: 170, r: 60, label: 'MVP by Friday' },
+    { id: 'db',       kind: 'decisions', key: 'decisions/db',         x: 420, y: 410, r: 70, label: 'AgensGraph + pgvector' },
+    { id: 'auth',     kind: 'decisions', key: 'decisions/auth',       x: 980, y: 410, r: 68, label: 'JWT + refresh' },
+    { id: 'api',      kind: 'decisions', key: 'decisions/api',        x: 700, y: 460, r: 64, label: 'REST + OpenAPI' },
+    { id: 'sqlite',   kind: 'failed',    key: 'failed/sqlite',        x: 220, y: 680, r: 56, label: 'SQLite · rejected' },
+    { id: 'migration',kind: 'work',      key: 'work/migration',       x: 500, y: 720, r: 60, label: 'Migration 0042' },
+    { id: 'frontend', kind: 'work',      key: 'work/frontend',        x: 1160, y: 680, r: 62, label: 'Frontend integration' },
+    { id: 'api-ok',   kind: 'status',    key: 'status/api',           x: 900, y: 720, r: 56, label: 'API · PASSING' },
+  ];
+
+  const EDGES = [
+    ['goal',     'db',        'SHAPES'],
+    ['goal',     'auth',      'SHAPES'],
+    ['goal',     'api',       'SHAPES'],
+    ['db',       'api',       'BACKS'],
+    ['auth',     'api',       'GATES'],
+    ['db',       'sqlite',    'REPLACES'],
+    ['db',       'migration', 'DRIVES'],
+    ['api',      'frontend',  'CONSUMED BY'],
+    ['api',      'api-ok',    'PROVES'],
+    ['migration','api-ok',    'UNBLOCKS'],
+    ['auth',     'frontend',  'INTEGRATES'],
+  ];
+
+  const DETAIL = {
+    'goal': {
+      pill: 'CONTEXT', kind: 'context',
+      key: 'context/goal', version: 1, author: 'julia-agent', updated: '2026-05-01',
+      content: 'Ship an MVP demo by Friday investors. Must run on a single $20/mo VPS, demo-friendly UX, real data not mocks.',
+      concepts: ['mvp', 'deadline', 'vps', 'investor-demo'],
+    },
+    'db': {
+      pill: 'DECISION', kind: 'decisions',
+      key: 'decisions/db', version: 2, author: 'julia-agent', updated: '2026-05-03',
+      content: 'AgensGraph (Postgres 16 fork) with pgvector — SQL, graph, and vector search in one instance. Eliminates the need for a separate vector store; embeddings sit alongside the relational tables they describe.',
+      concepts: ['pgvector', 'agensgraph', 'embeddings', 'cosine-similarity'],
+    },
+    'auth': {
+      pill: 'DECISION', kind: 'decisions',
+      key: 'decisions/auth', version: 3, author: 'selina-agent', updated: '2026-05-04',
+      content: 'JWT with 1-hour expiry, refresh via secure HTTP-only cookie. Short window means more refresh round-trips but bounds token blast radius.',
+      concepts: ['jwt', 'refresh-token', 'short-lived', 'rotate'],
+    },
+    'api': {
+      pill: 'DECISION', kind: 'decisions',
+      key: 'decisions/api', version: 4, author: 'julia-agent', updated: '2026-05-05',
+      content: 'REST endpoints with generated OpenAPI client for type safety. GraphQL was considered and rejected — adds infra weight without clear MVP wins.',
+      concepts: ['rest', 'openapi', 'type-safety', 'codegen'],
+    },
+    'sqlite': {
+      pill: 'FAILED', kind: 'failed',
+      key: 'failed/sqlite', version: 1, author: 'kappa-agent', updated: '2026-04-29',
+      content: 'SQLite cannot host pgvector and lacks JSONB. Considered for local-dev parity but the divergence from prod proved more dangerous than helpful — integration tests now hit a real Postgres.',
+      concepts: ['sqlite', 'pgvector', 'jsonb', 'dev-prod-parity'],
+    },
+    'migration': {
+      pill: 'WORK', kind: 'work',
+      key: 'work/migration', version: 4, author: 'julia-agent', updated: '2026-05-06',
+      content: 'Alembic migration 0042 adds embedding columns. Backfill batches of 50k rows, ~3 min each. Currently 80% complete on staging, expected production run Wednesday.',
+      concepts: ['alembic', 'backfill', 'embeddings', 'staging'],
+    },
+    'frontend': {
+      pill: 'WORK', kind: 'work',
+      key: 'work/frontend', version: 2, author: 'selina-agent', updated: '2026-05-06',
+      content: 'Next.js + Tailwind. Generated OpenAPI client wired in. Auth flow integrated with JWT cookie. Pagination + loading states pending.',
+      concepts: ['nextjs', 'tailwind', 'openapi-client', 'auth-flow'],
+    },
+    'api-ok': {
+      pill: 'STATUS', kind: 'status',
+      key: 'status/api', version: 12, author: 'julia-agent', updated: '2026-05-06',
+      content: 'PASSING — all 18 endpoints green. p99 latency 28ms after the select_related fix. Awaiting frontend integration tests before declaring fully done.',
+      concepts: ['fastapi', 'integration-tests', 'p99-latency'],
+    },
+  };
+
+  // ── Render edges + edge-labels + nodes ──
+  const NS = 'http://www.w3.org/2000/svg';
+  const svgEdges = document.getElementById('edges');
+  const svgEdgeLabels = document.getElementById('edge-labels');
+  const svgNodes = document.getElementById('nodes');
+  const nodeById = Object.fromEntries(NODES.map(n => [n.id, n]));
+
+  EDGES.forEach(([a, b, label], i) => {
+    const A = nodeById[a], B = nodeById[b];
+    const line = document.createElementNS(NS, 'line');
+    line.setAttribute('class', 'edge');
+    line.setAttribute('data-from', a);
+    line.setAttribute('data-to', b);
+    line.setAttribute('data-idx', i);
+    line.setAttribute('x1', A.x);
+    line.setAttribute('y1', A.y);
+    line.setAttribute('x2', B.x);
+    line.setAttribute('y2', B.y);
+    svgEdges.appendChild(line);
+
+    // Edge label, hidden by default — shown when the edge becomes "hot"
+    const mx = (A.x + B.x) / 2;
+    const my = (A.y + B.y) / 2;
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'edge-label-g');
+    g.setAttribute('data-idx', i);
+    g.setAttribute('transform', `translate(${mx},${my})`);
+
+    // Measure-after-mount; for now make a generous pill that fits any short label
+    const padX = 10, padY = 4;
+    const approxW = label.length * 7 + padX * 2;
+    const approxH = 18;
+    const rect = document.createElementNS(NS, 'rect');
+    rect.setAttribute('class', 'edge-label-bg');
+    rect.setAttribute('x', -approxW / 2);
+    rect.setAttribute('y', -approxH / 2);
+    rect.setAttribute('width', approxW);
+    rect.setAttribute('height', approxH);
+    rect.setAttribute('rx', 4);
+
+    const text = document.createElementNS(NS, 'text');
+    text.setAttribute('class', 'edge-label');
+    text.textContent = label;
+
+    g.appendChild(rect);
+    g.appendChild(text);
+    svgEdgeLabels.appendChild(g);
+  });
+
+  NODES.forEach(n => {
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', `node-g ${n.kind}`);
+    g.setAttribute('data-id', n.id);
+    g.setAttribute('transform', `translate(${n.x},${n.y})`);
+
+    const circle = document.createElementNS(NS, 'circle');
+    circle.setAttribute('class', 'node-bg');
+    circle.setAttribute('r', n.r);
+    g.appendChild(circle);
+
+    // Two-line label inside the circle: namespace badge above, concept text below.
+    // Vertically center the whole stack (ns + 1-2 lines) around the node origin.
+    const words = n.label.split(' ');
+    let line1 = words.slice(0, Math.ceil(words.length / 2)).join(' ');
+    let line2 = words.slice(Math.ceil(words.length / 2)).join(' ');
+    if (!line2) line1 = n.label;
+    const twoLines = !!line2;
+
+    // ns is ~12px tall (font-size 10 + small leading), node-label lines are ~18px.
+    // Stack from top: ns (gap 10) line1 (gap 4) line2?
+    const nsH = 12, lineH = 18, gapNs = 12, gapLine = 4;
+    const totalH = nsH + gapNs + lineH + (twoLines ? gapLine + lineH : 0);
+    const top = -totalH / 2;
+    const nsY = top + nsH / 2;
+    const l1Y = top + nsH + gapNs + lineH / 2;
+    const l2Y = l1Y + gapLine + lineH;
+
+    const ns = document.createElementNS(NS, 'text');
+    ns.setAttribute('class', 'node-ns');
+    ns.setAttribute('text-anchor', 'middle');
+    ns.setAttribute('dominant-baseline', 'central');
+    ns.setAttribute('y', nsY);
+    ns.textContent = n.kind;
+    g.appendChild(ns);
+
+    const t1 = document.createElementNS(NS, 'text');
+    t1.setAttribute('class', 'node-label');
+    t1.setAttribute('text-anchor', 'middle');
+    t1.setAttribute('dominant-baseline', 'central');
+    t1.setAttribute('y', l1Y);
+    t1.textContent = line1;
+    g.appendChild(t1);
+
+    if (twoLines) {
+      const t2 = document.createElementNS(NS, 'text');
+      t2.setAttribute('class', 'node-label');
+      t2.setAttribute('text-anchor', 'middle');
+      t2.setAttribute('dominant-baseline', 'central');
+      t2.setAttribute('y', l2Y);
+      t2.textContent = line2;
+      g.appendChild(t2);
+    }
+
+    g.addEventListener('click', () => select(n.id));
+    svgNodes.appendChild(g);
+  });
+
+  // ── Selection / highlight ──
+  function select(id) {
+    document.querySelectorAll('.node-g').forEach(g => {
+      g.classList.remove('selected', 'dim');
+    });
+    document.querySelectorAll('.edge').forEach(e => {
+      e.classList.remove('hot', 'dim');
+    });
+
+    const neighbors = new Set([id]);
+    EDGES.forEach(([a, b]) => {
+      if (a === id) neighbors.add(b);
+      if (b === id) neighbors.add(a);
+    });
+
+    document.querySelectorAll('.node-g').forEach(g => {
+      const nid = g.dataset.id;
+      if (nid === id) g.classList.add('selected');
+      else if (!neighbors.has(nid)) g.classList.add('dim');
+    });
+
+    document.querySelectorAll('.edge').forEach(e => {
+      const from = e.dataset.from, to = e.dataset.to;
+      const incident = from === id || to === id;
+      if (incident) e.classList.add('hot');
+      else e.classList.add('dim');
+      // Mirror to the label
+      const lbl = document.querySelector(`.edge-label-g[data-idx="${e.dataset.idx}"]`);
+      if (lbl) {
+        if (incident) lbl.classList.add('visible');
+        else lbl.classList.remove('visible');
+      }
+    });
+
+    showDetail(id);
+  }
+
+  function showDetail(id) {
+    const d = DETAIL[id];
+    const card = document.getElementById('detail');
+    if (!d) {
+      card.classList.add('hidden');
+      return;
+    }
+    card.classList.remove('hidden');
+    const pill = document.getElementById('d-pill');
+    pill.textContent = d.pill;
+    pill.className = `detail-pill ${d.kind}`;
+
+    const [ns, leaf] = d.key.split('/');
+    document.getElementById('d-key').innerHTML = `<span class="ns">${ns}/</span>${leaf}`;
+    document.getElementById('d-version').textContent = d.version;
+    document.getElementById('d-author').textContent = d.author;
+    document.getElementById('d-updated').textContent = d.updated;
+    document.getElementById('d-content').textContent = d.content;
+
+    // Connections derived from edges
+    const conns = EDGES
+      .filter(([a, b]) => a === id || b === id)
+      .map(([a, b, label]) => {
+        const other = a === id ? b : a;
+        const o = nodeById[other];
+        return { kind: o.kind, key: o.key, label };
+      });
+    const wrap = document.getElementById('d-connections');
+    wrap.innerHTML = conns.map(c => {
+      const [ns, leaf] = c.key.split('/');
+      return `<div class="conn" data-kind="${c.kind}" data-target="${c.key}">
+        <span class="dot"></span>
+        <span class="arrow">${c.label}</span>
+        <span class="target"><span class="ns">${ns}/</span>${leaf}</span>
+      </div>`;
+    }).join('');
+    document.querySelector('.detail-section h4').nextElementSibling;
+    wrap.previousElementSibling.textContent = `Connections · ${conns.length}`;
+
+    wrap.querySelectorAll('.conn').forEach(c => {
+      c.addEventListener('click', () => {
+        const target = c.dataset.target;
+        const tn = NODES.find(n => n.key === target);
+        if (tn) select(tn.id);
+      });
+    });
+
+    document.querySelectorAll('.tag').forEach(t => t.remove());
+    const tagWrap = document.querySelector('.tags');
+    tagWrap.innerHTML = (d.concepts || []).map(c => `<span class="tag">${c}</span>`).join('');
+  }
+
+  document.getElementById('d-close').addEventListener('click', () => {
+    document.querySelectorAll('.node-g').forEach(g => g.classList.remove('selected', 'dim'));
+    document.querySelectorAll('.edge').forEach(e => e.classList.remove('hot', 'dim'));
+    document.querySelectorAll('.edge-label-g').forEach(g => g.classList.remove('visible'));
+    document.getElementById('detail').classList.add('hidden');
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('d-close').click();
+  });
+
+  // ── Typeahead ──
+  const KIND_LABELS = {
+    decisions: 'decision', failed: 'failed', work: 'work',
+    status: 'status', context: 'context',
+  };
+  const taInput = document.getElementById('ta-input');
+  const taPanel = document.getElementById('typeahead');
+  let taFocusedIdx = -1;
+  let taResults = [];
+
+  function escapeReg(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  function highlight(text, q) {
+    if (!q) return text;
+    const re = new RegExp(`(${escapeReg(q)})`, 'gi');
+    return text.replace(re, '<mark>$1</mark>');
+  }
+
+  function search(q) {
+    const query = q.trim().toLowerCase();
+    if (!query) {
+      // Empty input shows all 8 nodes sorted by namespace
+      return [...NODES].sort((a, b) => a.kind.localeCompare(b.kind) || a.key.localeCompare(b.key));
+    }
+    return NODES
+      .map(n => {
+        const det = DETAIL[n.id] || {};
+        const concepts = (det.concepts || []).join(' ');
+        const hay = `${n.key} ${n.label} ${concepts}`.toLowerCase();
+        const idx = hay.indexOf(query);
+        if (idx === -1) return null;
+        // Light scoring: matches in key rank highest, then label, then concepts.
+        const keyHit = n.key.toLowerCase().indexOf(query);
+        const labelHit = n.label.toLowerCase().indexOf(query);
+        const score = keyHit !== -1 ? keyHit : labelHit !== -1 ? 100 + labelHit : 200 + idx;
+        return { node: n, score };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.score - b.score)
+      .map(r => r.node);
+  }
+
+  function renderTypeahead(q) {
+    taResults = search(q);
+    taFocusedIdx = taResults.length ? 0 : -1;
+    if (!taResults.length) {
+      taPanel.innerHTML = `<div class="ta-empty">No matches for "${q}"</div>`;
+      return;
+    }
+    const items = taResults.map((n, i) => {
+      const [ns, leaf] = n.key.split('/');
+      const keyHtml = `<span class="ns">${highlight(ns + '/', q)}</span>${highlight(leaf, q)}`;
+      const labelHtml = highlight(n.label, q);
+      return `<div class="ta-item" data-kind="${n.kind}" data-id="${n.id}" data-idx="${i}">
+        <div class="ta-dot"></div>
+        <div class="ta-key">${keyHtml}</div>
+        <div class="ta-label">${labelHtml}</div>
+        <div class="ta-kind">${KIND_LABELS[n.kind] || n.kind}</div>
+      </div>`;
+    }).join('');
+    taPanel.innerHTML = (q ? '' : '<div class="ta-section-label">All concepts</div>') + items;
+    updateFocused();
+    taPanel.querySelectorAll('.ta-item').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        taFocusedIdx = parseInt(el.dataset.idx, 10);
+        updateFocused();
+      });
+      el.addEventListener('click', () => pickResult(parseInt(el.dataset.idx, 10)));
+    });
+  }
+
+  function updateFocused() {
+    taPanel.querySelectorAll('.ta-item').forEach((el, i) => {
+      el.classList.toggle('focused', i === taFocusedIdx);
+    });
+  }
+
+  function openTypeahead() {
+    renderTypeahead(taInput.value);
+    taPanel.classList.add('open');
+  }
+  function closeTypeahead() {
+    taPanel.classList.remove('open');
+  }
+  function pickResult(idx) {
+    const n = taResults[idx];
+    if (!n) return;
+    taInput.value = '';
+    closeTypeahead();
+    select(n.id);
+  }
+
+  taInput.addEventListener('focus', openTypeahead);
+  taInput.addEventListener('input', () => renderTypeahead(taInput.value));
+  taInput.addEventListener('keydown', e => {
+    if (!taPanel.classList.contains('open') && e.key !== 'Escape') openTypeahead();
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      taFocusedIdx = Math.min(taFocusedIdx + 1, taResults.length - 1);
+      updateFocused();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      taFocusedIdx = Math.max(taFocusedIdx - 1, 0);
+      updateFocused();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (taFocusedIdx >= 0) pickResult(taFocusedIdx);
+    } else if (e.key === 'Escape') {
+      closeTypeahead();
+      taInput.blur();
+    }
+  });
+  // Click outside closes
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search') && !e.target.closest('.typeahead')) {
+      closeTypeahead();
+    }
+  });
+  // ⌘K / Ctrl+K focuses
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      taInput.focus();
+      taInput.select();
+    }
+  });
+
+  // Pre-select the central node so the sketch lands on a hero state
+  select('db');
+</script>
+</body>
+</html>

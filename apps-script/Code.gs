@@ -18,6 +18,7 @@ function doPost(e) {
     const kind = body.kind;
     if (kind === "survey") return handleSurvey(body);
     if (kind === "preview_react") return handlePreviewReact(body);
+    if (kind === "install_stuck") return handleInstallStuck(body);
     return jsonOut({ ok: false, error: "unknown kind" });
   } catch (err) {
     return jsonOut({ ok: false, error: String(err) });
@@ -74,6 +75,22 @@ function handlePreviewReact(body) {
     body.reaction || "",
     body.comment || "",
     hash(body.sessionToken),
+  ]);
+  return jsonOut({ ok: true });
+}
+
+function handleInstallStuck(body) {
+  const p = body.payload || {};
+  if (!p.text) return jsonOut({ ok: false, error: "empty" });
+  const sheet = getSheet("install_stuck");
+  ensureHeaders(sheet, [
+    "timestamp", "step_index", "step_id", "text",
+  ]);
+  sheet.appendRow([
+    new Date().toISOString(),
+    p.step_index,
+    p.step_id || "",
+    String(p.text).slice(0, 4000),
   ]);
   return jsonOut({ ok: true });
 }

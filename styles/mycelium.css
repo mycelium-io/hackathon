@@ -111,7 +111,8 @@ body {
 .topnav-right a {
   color: var(--muted);
   text-decoration: none;
-  font-size: 15px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
   font-family: 'SF Mono', monospace;
   transition: color 0.2s;
 }

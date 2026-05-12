@@ -5,7 +5,7 @@
 const PAGES = [
   { id: "install", file: "install.html", label: "INSTALL" },
   { id: "survey", file: "survey.html", label: "SURVEY" },
-  { id: "preview", file: "preview.html", label: "PREVIEW" },
+  { id: "preview", file: "preview.html", label: "WHAT'S NEXT" },
 ];
 
 function renderChrome(activeId) {
