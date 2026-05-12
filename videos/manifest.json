@@ -79,22 +79,10 @@
       "video": "videos/preview/graph-explorer.mp4"
     },
     {
-      "id": "agent-mesh",
-      "title": "Agent Mesh",
-      "description": "Cross-org coordination — agents from different teams coordinate over a shared Mycelium hub without sharing infra.",
-      "video": "videos/preview/agent-mesh.mp4"
-    },
-    {
-      "id": "memory-replay",
-      "title": "Memory Replay",
-      "description": "Scrub through a room's history like a video timeline — see exactly when a decision was made and what context surrounded it.",
-      "video": "videos/preview/memory-replay.mp4"
-    },
-    {
-      "id": "auto-synthesis",
-      "title": "Continuous Synthesis",
-      "description": "Background synthesis that re-summarizes the room as new memories arrive, with diff highlighting on what changed.",
-      "video": "videos/preview/auto-synthesis.mp4"
+      "id": "supervisor",
+      "title": "Supervisor Mode",
+      "description": "Hire agents with personas, give them a goal, and let Mycelium orchestrate. The system detects when negotiation is needed, mediates the rounds, and turns agreements into tasks. You're the manager — not the operator.",
+      "video": "videos/preview/supervisor.mp4"
     }
   ]
 }
