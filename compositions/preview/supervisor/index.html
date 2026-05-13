@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1920, height=1080"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,600&family=IBM+Plex+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  margin: 0; width: 1920px; height: 1080px;
+  overflow: hidden; background: #0c0d10;
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: #eaeaea;
+}
+:root {
+  --bg: #0c0d10; --surface: #111216; --paper: #14161b;
+  --border: rgba(234,234,234,0.10); --border2: rgba(234,234,234,0.22);
+  --accent: #5dd4e0; --text: #eaeaea; --text2: #a8a6a0; --muted: #b8b5ae;
+  --green: #34d399; --purple: #c084fc; --blue: #818cf8; --yellow: #fbbf24; --red: #f87171;
+}
+#mycelium-bg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 0; opacity: 0.4; transform: scale(2);
+}
+.scene {
+  position: absolute; inset: 0; z-index: 2;
+  padding: 80px 120px;
+}
+
+/* ── Scene title overlay (number + caption) ── */
+.scene-title {
+  position: absolute;
+  top: 60px; left: 120px;
+  display: flex; align-items: baseline; gap: 24px;
+  z-index: 10;
+}
+.scene-title .num {
+  font-family: 'Geist Mono', monospace;
+  font-size: 22px; font-weight: 600;
+  letter-spacing: 0.28em;
+  color: var(--accent);
+}
+.scene-title .caption {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-weight: 600;
+  font-size: 60px; line-height: 1;
+  color: var(--text);
+}
+.callout-sub {
+  position: absolute;
+  left: 120px; bottom: 70px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 20px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  z-index: 10;
+}
+
+/* ── Intro scene ── */
+.intro {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 36px; padding: 100px 160px;
+}
+.intro-eyebrow {
+  font-family: 'Geist Mono', monospace;
+  font-size: 26px; font-weight: 600;
+  letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--accent);
+}
+.intro-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-weight: 600;
+  font-size: 132px; line-height: 1;
+  color: var(--text); text-align: center;
+}
+.intro-subhead {
+  font-size: 38px; line-height: 1.4;
+  color: var(--text2);
+  text-align: center; max-width: 1380px;
+}
+
+/* ── Frame container ── */
+.frame {
+  background: rgba(20,22,27,0.92);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  overflow: hidden;
+}
+
+/* ── 01 · Hire ── */
+.hire-layout {
+  position: absolute;
+  top: 200px; left: 120px; right: 120px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  height: 740px;
+}
+.terminal { font-family: 'Geist Mono', monospace; font-size: 20px; line-height: 1.55; }
+.term-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+.term-bar .dot { width: 16px; height: 16px; border-radius: 50%; }
+.dot.r { background: #ff6058; } .dot.y { background: #ffbd2e; } .dot.g { background: #28c941; }
+.term-bar .title {
+  margin-left: 18px; color: var(--muted);
+  font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase;
+}
+.term-body { padding: 28px 32px; }
+.term-line { display: block; white-space: pre-wrap; }
+.term-line + .term-line { margin-top: 6px; }
+.term-line.cmd  { color: var(--text); }
+.term-line.cmd .prompt { color: var(--accent); }
+.term-line.cont { color: var(--text2); padding-left: 20px; }
+.term-line.flag { color: var(--accent); }
+.term-line.str  { color: var(--green); }
+.term-line.dim  { color: var(--muted); }
+.term-line.ok   { color: var(--green); }
+.term-line .key { color: var(--purple); }
+
+.agent-card { padding: 32px; display: flex; flex-direction: column; gap: 22px; }
+.agent-head { display: flex; align-items: center; gap: 18px; }
+.agent-avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Geist Mono', monospace;
+  font-weight: 700; font-size: 26px; color: var(--accent);
+}
+.agent-name-row { flex: 1; }
+.agent-name { font-family: 'Geist Mono', monospace; font-size: 26px; color: var(--text); font-weight: 600; }
+.agent-meta {
+  margin-top: 6px; display: flex; gap: 14px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 16px; color: var(--muted);
+}
+.agent-meta .adapter {
+  padding: 3px 10px;
+  background: rgba(93,212,224,0.08);
+  border: 1px solid rgba(93,212,224,0.25);
+  color: var(--accent);
+  border-radius: 5px; letter-spacing: 0.06em;
+}
+.agent-status {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 14px; color: var(--green);
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.agent-status .pulse {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+}
+.agent-field { border-top: 1px solid var(--border); padding-top: 20px; }
+.agent-field h4 {
+  font-family: 'Geist Mono', monospace; font-size: 13px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px;
+}
+.agent-field p { font-size: 18px; line-height: 1.55; color: var(--text); }
+.agent-caps { display: flex; gap: 8px; flex-wrap: wrap; }
+.cap {
+  font-family: 'Geist Mono', monospace; font-size: 14px;
+  padding: 5px 11px; border-radius: 5px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+
+/* Compact agent cards (used in 01) — stacks two adapters in one column */
+#hire-stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.mini-card {
+  padding: 20px 22px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.mini-card.mc-be { border-color: rgba(93,212,224,0.3); }
+.mini-card.mc-pm { border-color: rgba(192,132,252,0.3); }
+.mc-head { display: flex; align-items: center; gap: 14px; }
+.mc-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Geist Mono', monospace; font-weight: 700; font-size: 18px;
+}
+.mc-be .mc-avatar { color: var(--accent); }
+.mc-pm .mc-avatar { color: var(--purple); }
+.mc-name-row { flex: 1; min-width: 0; }
+.mc-name {
+  font-family: 'Geist Mono', monospace; font-size: 20px;
+  color: var(--text); font-weight: 600;
+}
+.mc-meta {
+  margin-top: 4px;
+  display: flex; gap: 10px;
+  font-family: 'Geist Mono', monospace; font-size: 13px;
+  color: var(--muted);
+}
+.mc-meta .adapter {
+  padding: 2px 9px;
+  border-radius: 4px;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+.mc-meta .adapter.be {
+  background: rgba(93,212,224,0.1);
+  border: 1px solid rgba(93,212,224,0.32);
+  color: var(--accent);
+}
+.mc-meta .adapter.pm {
+  background: rgba(192,132,252,0.1);
+  border: 1px solid rgba(192,132,252,0.32);
+  color: var(--purple);
+}
+.mc-cwd { color: var(--text2); }
+.mc-status {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Geist Mono', monospace; font-size: 13px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--green);
+}
+.mc-status .pulse {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 9px var(--green);
+}
+.mc-persona {
+  font-size: 16px; line-height: 1.5;
+  color: var(--text2);
+  font-style: italic;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+.hire-bridge {
+  display: flex; align-items: center; gap: 14px;
+  padding: 4px 8px;
+}
+.hire-bridge-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(to right, transparent, var(--border2), transparent);
+}
+.hire-bridge-tag {
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Dash (used by 02 + 03) ── */
+.dash {
+  position: absolute;
+  top: 200px; left: 120px; right: 120px;
+  display: grid;
+  grid-template-columns: 360px 1fr 360px;
+  height: 760px;
+  overflow: hidden;
+}
+.dash-rail-l, .dash-rail-r {
+  display: flex; flex-direction: column;
+}
+.dash-rail-l { border-right: 1px solid var(--border); }
+.dash-rail-r { border-left: 1px solid var(--border); }
+.rail-header {
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.015);
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rail-header .count { color: var(--text); font-weight: 600; }
+.rail-body { flex: 1; padding: 12px; overflow: hidden; }
+.agent-row {
+  display: grid; grid-template-columns: 40px 1fr auto;
+  gap: 10px; padding: 12px; border-radius: 8px;
+  margin-bottom: 8px;
+}
+.agent-row.active { background: rgba(255,255,255,0.04); }
+.agent-row .av {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--surface); border: 1.5px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Geist Mono', monospace; font-weight: 700; font-size: 15px;
+}
+.agent-row.k-be .av { border-color: var(--accent); color: var(--accent); }
+.agent-row.k-pm .av { border-color: var(--purple); color: var(--purple); }
+.agent-row.k-design .av { border-color: var(--green); color: var(--green); }
+.agent-row.k-ops .av { border-color: var(--yellow); color: var(--yellow); }
+\.agent-row \.info { min-width: 0; overflow: hidden; }
+.agent-row .name { font-family: 'Geist Mono', monospace; font-size: 16px; color: var(--text); font-weight: 600; }
+.agent-row .role { font-size: 13px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agent-row .status-col { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.agent-row .stat {
+  font-family: 'Geist Mono', monospace; font-size: 11px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.stat.neg  { color: var(--accent); }
+.stat.task { color: var(--blue); }
+.stat.idle { color: var(--muted); }
+.stat.posted { color: var(--green); }
+.agent-row .burn { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--muted); }
+
+.dash-main { display: flex; flex-direction: column; min-width: 0; }
+.room-header {
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.015);
+}
+.room-name {
+  font-family: 'Geist Mono', monospace;
+  font-size: 15px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+.room-name .hash { color: var(--accent); }
+.room-goal {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-weight: 600;
+  font-size: 30px; color: var(--text); line-height: 1.15;
+}
+.room-meta {
+  margin-top: 10px; display: flex; gap: 20px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px; color: var(--muted); letter-spacing: 0.08em;
+}
+.room-meta .v { color: var(--text); margin-left: 4px; }
+
+.center-panel {
+  flex: 1; padding: 24px 28px;
+  display: flex; flex-direction: column; gap: 16px;
+  overflow: hidden;
+}
+
+/* Conflict banner (02) */
+.conflict-banner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 20px;
+  border: 1px solid var(--yellow);
+  background: rgba(251,191,36,0.06);
+  border-radius: 10px;
+}
+.conflict-pulse {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--yellow); box-shadow: 0 0 14px var(--yellow);
+}
+.conflict-head {
+  font-family: 'Geist Mono', monospace; font-size: 14px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--yellow); font-weight: 600;
+}
+.conflict-sub {
+  font-size: 15px; color: var(--text2); margin-top: 4px;
+}
+.conflict-sub strong { font-family: 'Geist Mono', monospace; color: var(--text); font-weight: 600; }
+.conflict-sub .who { font-family: 'Geist Mono', monospace; }
+.conflict-sub .who.be { color: var(--accent); }
+.conflict-sub .who.pm { color: var(--purple); }
+.conflict-action {
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--green);
+  white-space: nowrap;
+}
+
+.positions-head {
+  font-family: 'Geist Mono', monospace; font-size: 13px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+  margin-top: 4px;
+}
+.position-row {
+  display: grid; grid-template-columns: 48px 1fr; gap: 14px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.015);
+}
+.position-row.be { border-color: rgba(93,212,224,0.28); background: rgba(93,212,224,0.04); }
+.position-row.pm { border-color: rgba(192,132,252,0.28); background: rgba(192,132,252,0.04); }
+.pos-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1.5px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Geist Mono', monospace; font-weight: 700; font-size: 14px;
+}
+.position-row.be .pos-avatar { border-color: var(--accent); color: var(--accent); }
+.position-row.pm .pos-avatar { border-color: var(--purple); color: var(--purple); }
+.pos-meta {
+  display: flex; gap: 14px; align-items: baseline;
+  font-family: 'Geist Mono', monospace; font-size: 13px; margin-bottom: 6px;
+}
+.pos-who { font-weight: 600; color: var(--text); }
+.position-row.be .pos-who { color: var(--accent); }
+.position-row.pm .pos-who { color: var(--purple); }
+.pos-key { color: var(--muted); }
+.pos-time { margin-left: auto; color: var(--muted); font-size: 12px; }
+.pos-text { font-size: 16px; line-height: 1.45; color: var(--text); }
+
+/* Negotiate (03) */
+.neg-header { display: flex; align-items: center; gap: 14px; }
+.neg-pulse {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 14px var(--accent);
+}
+.neg-title {
+  font-family: 'Geist Mono', monospace; font-size: 14px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent);
+}
+.neg-round {
+  margin-left: auto;
+  font-family: 'Geist Mono', monospace; font-size: 13px;
+  color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase;
+}
+.neg-round .v { color: var(--text); margin-left: 4px; }
+.issues { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.issue-row {
+  display: grid; grid-template-columns: 200px 1fr 1fr;
+  border-bottom: 1px solid var(--border);
+}
+.issue-row:last-child { border-bottom: none; }
+.issue-row.head { background: rgba(255,255,255,0.02); }
+.issue-row .cell {
+  padding: 14px 18px; font-family: 'Geist Mono', monospace; font-size: 15px;
+}
+.issue-row.head .cell {
+  font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+}
+.issue-row .lane { border-right: 1px solid var(--border); color: var(--text); }
+.issue-row .pos { border-right: 1px solid var(--border); }
+.issue-row .pos.be { color: var(--accent); }
+.issue-row .pos.pm { color: var(--purple); }
+
+.current-offer {
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 18px 22px;
+  background: rgba(93,212,224,0.05);
+}
+.current-offer .head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.current-offer .label {
+  font-family: 'Geist Mono', monospace; font-size: 13px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent);
+}
+.current-offer .who {
+  margin-left: auto; font-family: 'Geist Mono', monospace;
+  font-size: 13px; color: var(--purple); letter-spacing: 0.06em;
+}
+.current-offer .pairs {
+  display: flex; gap: 24px; flex-wrap: wrap;
+  font-family: 'Geist Mono', monospace; font-size: 17px;
+}
+.current-offer .pair .k { color: var(--muted); margin-right: 8px; }
+.current-offer .pair .v { color: var(--text); font-weight: 600; }
+
+/* Activity feed */
+.feed-item { display: flex; gap: 12px; padding: 12px; }
+.feed-item + .feed-item { border-top: 1px solid var(--border); }
+.feed-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 8px; flex-shrink: 0; }
+.feed-dot.accent { background: var(--accent); }
+.feed-dot.purple { background: var(--purple); }
+.feed-dot.green  { background: var(--green); }
+.feed-dot.muted  { background: var(--muted); }
+.feed-dot.yellow { background: var(--yellow); }
+.feed-body { min-width: 0; font-size: 14px; color: var(--text); line-height: 1.45; }
+.feed-body .ts {
+  display: block; font-family: 'Geist Mono', monospace; font-size: 11px;
+  color: var(--muted); letter-spacing: 0.06em; margin-bottom: 3px;
+}
+.feed-body .who { font-family: 'Geist Mono', monospace; }
+.feed-body .who.be { color: var(--accent); }
+.feed-body .who.pm { color: var(--purple); }
+.feed-body .who.ce { color: var(--green); }
+
+/* ── 04 · Outcome ── */
+.outcome {
+  position: absolute;
+  top: 200px; left: 120px; right: 120px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  height: 760px;
+}
+.consensus {
+  border: 1px solid var(--green);
+  background: rgba(52,211,153,0.06);
+  border-radius: 14px;
+  padding: 32px 36px;
+}
+.consensus .head {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 24px;
+}
+.consensus .pulse {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 14px var(--green);
+}
+.consensus .label {
+  font-family: 'Geist Mono', monospace; font-size: 16px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--green); font-weight: 600;
+}
+.consensus .round {
+  margin-left: auto; font-family: 'Geist Mono', monospace;
+  font-size: 13px; color: var(--muted); letter-spacing: 0.14em;
+}
+.agreement-row {
+  display: grid; grid-template-columns: 200px 1fr;
+  gap: 18px; padding: 14px 0;
+  border-bottom: 1px solid rgba(52,211,153,0.18);
+  font-family: 'Geist Mono', monospace;
+}
+.agreement-row:last-child { border-bottom: none; }
+.agreement-row .k {
+  font-size: 14px; color: var(--green);
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.agreement-row .v { font-size: 19px; color: var(--text); font-weight: 600; }
+
+.tasks-panel { padding: 28px 32px; }
+.tasks-panel h3 {
+  font-family: 'Geist Mono', monospace; font-size: 13px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 18px;
+}
+.tasks-panel h3 .sub { color: var(--muted); margin-left: 8px; font-weight: 400; }
+.task-group { margin-bottom: 22px; }
+.task-group:last-child { margin-bottom: 0; }
+.task-group-head {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 14px; font-weight: 600; margin-bottom: 12px;
+}
+.task-group-head .av {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1.5px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+.task-group.be .task-group-head { color: var(--accent); }
+.task-group.pm .task-group-head { color: var(--purple); }
+.task {
+  display: grid; grid-template-columns: 20px 1fr auto;
+  gap: 12px; padding: 11px 14px;
+  border-radius: 8px; border: 1px solid var(--border);
+  margin-bottom: 6px; align-items: center;
+}
+.task-check {
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--border2); border-radius: 4px;
+}
+.task-check.done { background: var(--green); border-color: var(--green); }
+.task-body { font-size: 15px; color: var(--text); }
+.task-body.done { text-decoration: line-through; color: var(--muted); }
+.task-state {
+  font-family: 'Geist Mono', monospace; font-size: 11px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+}
+.task-state.todo  { color: var(--muted); }
+.task-state.doing { color: var(--blue); }
+.task-state.done  { color: var(--green); }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="32" data-width="1920" data-height="1080">
+  <canvas id="mycelium-bg" class="clip" data-start="0" data-duration="32" data-track-index="0"></canvas>
+
+  <!-- ── Intro ── -->
+  <div id="intro" class="intro clip" data-start="0" data-duration="5" data-track-index="1">
+    <div id="i-eyebrow" class="intro-eyebrow">Preview · What's Next</div>
+    <div id="i-title" class="intro-title">Supervisor Mode</div>
+    <div id="i-subhead" class="intro-subhead">Mycelium orchestrates your existing agents — Claude Code, OpenClaw, custom runtimes. Hire them with personas, assign a goal, and you become the manager.</div>
+  </div>
+
+  <!-- ── 01 · Hire ── -->
+  <div id="v1" class="clip" data-start="4" data-duration="7" data-track-index="2">
+    <div class="scene-title">
+      <span class="num">01</span>
+      <span class="caption">Hire your team</span>
+    </div>
+    <div class="hire-layout">
+      <div class="frame">
+        <div class="term-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="title">~ sprint-plan</span>
+        </div>
+        <div class="terminal term-body" id="hire-term">
+          <div id="hl1" class="term-line cmd"><span class="prompt">$</span> <span id="hire-typed-1"></span><span id="hire-caret-1" style="display:inline-block;width:2px;height:22px;background:var(--accent);margin-left:2px;vertical-align:middle;"></span></div>
+          <div id="hl1-ok" class="term-line ok" style="opacity:0">✓ backend-lead hired on <span class="key">claude_local</span></div>
+          <div id="hl2" class="term-line cmd" style="opacity:0; margin-top:14px"><span class="prompt">$</span> <span id="hire-typed-2"></span><span id="hire-caret-2" style="display:inline-block;width:2px;height:22px;background:var(--accent);margin-left:2px;vertical-align:middle;opacity:0;"></span></div>
+          <div id="hl2-ok" class="term-line ok" style="opacity:0">✓ product-mgr hired on <span class="key">openclaw_gateway</span></div>
+          <div id="hl3-info" class="term-line dim" style="opacity:0; margin-top:14px">▸ both agents joined <span class="key">#sprint-plan</span> · heartbeats scheduled</div>
+        </div>
+      </div>
+
+      <div id="hire-stack">
+        <div id="hire-card-1" class="frame mini-card mc-be">
+          <div class="mc-head">
+            <div class="mc-avatar">BL</div>
+            <div class="mc-name-row">
+              <div class="mc-name">backend-lead</div>
+              <div class="mc-meta">
+                <span class="adapter be">CLAUDE_CODE</span>
+                <span class="mc-cwd">~/myproject</span>
+              </div>
+            </div>
+            <div class="mc-status be">
+              <span class="pulse"></span>idle
+            </div>
+          </div>
+          <div class="mc-persona">"Senior backend engineer. Values reliability, test coverage, and incremental delivery."</div>
+        </div>
+
+        <div id="hire-card-2" class="frame mini-card mc-pm">
+          <div class="mc-head">
+            <div class="mc-avatar">PM</div>
+            <div class="mc-name-row">
+              <div class="mc-name">product-mgr</div>
+              <div class="mc-meta">
+                <span class="adapter pm">OPENCLAW</span>
+                <span class="mc-cwd">openclaw.example.com</span>
+              </div>
+            </div>
+            <div class="mc-status pm">
+              <span class="pulse"></span>idle
+            </div>
+          </div>
+          <div class="mc-persona">"Product manager. Optimizes for shipping speed. Willing to cut scope to hit deadlines."</div>
+        </div>
+
+        <div id="hire-bridge" class="hire-bridge">
+          <div class="hire-bridge-line"></div>
+          <div class="hire-bridge-tag">both agents · same room · same protocol</div>
+          <div class="hire-bridge-line"></div>
+        </div>
+      </div>
+    </div>
+    <div id="v1-sub" class="callout-sub">Bring your Claude Code · OpenClaw · or any HTTP runtime</div>
+  </div>
+
+  <!-- ── 02 · Settle in ── -->
+  <div id="v2" class="clip" data-start="11" data-duration="7" data-track-index="3">
+    <div class="scene-title">
+      <span class="num">02</span>
+      <span class="caption">Agents settle in</span>
+    </div>
+    <div class="frame dash">
+      <!-- Left rail -->
+      <div class="dash-rail-l">
+        <div class="rail-header"><span>Agents</span><span class="count">4</span></div>
+        <div class="rail-body">
+          <div class="agent-row k-be"><div class="av">BL</div><div class="info"><div class="name">backend-lead</div><div class="role">claude_local · reliability</div></div><div class="status-col"><div class="stat posted">posted</div><div class="burn">$0.18</div></div></div>
+          <div class="agent-row k-pm"><div class="av">PM</div><div class="info"><div class="name">product-mgr</div><div class="role">openclaw · shipping speed</div></div><div class="status-col"><div class="stat posted">posted</div><div class="burn">$0.12</div></div></div>
+          <div class="agent-row k-design"><div class="av">DS</div><div class="info"><div class="name">design-lead</div><div class="role">claude_local · UX clarity</div></div><div class="status-col"><div class="stat task">working</div><div class="burn">$0.45</div></div></div>
+          <div class="agent-row k-ops"><div class="av">OP</div><div class="info"><div class="name">ops-lead</div><div class="role">openclaw · uptime first</div></div><div class="status-col"><div class="stat idle">idle</div><div class="burn">$0.03</div></div></div>
+        </div>
+      </div>
+      <!-- Main -->
+      <div class="dash-main">
+        <div class="room-header">
+          <div class="room-name"><span class="hash">#</span>sprint-plan</div>
+          <div class="room-goal">Plan the Q3 sprint priorities</div>
+          <div class="room-meta">
+            <span>session:<span class="v">none</span></span>
+            <span>memory:<span class="v">7 entries</span></span>
+            <span>agreements:<span class="v">0</span></span>
+          </div>
+        </div>
+        <div class="center-panel">
+          <div id="conflict-banner" class="conflict-banner">
+            <span class="conflict-pulse"></span>
+            <div>
+              <div class="conflict-head">competing positions detected</div>
+              <div class="conflict-sub">
+                <span class="who be">backend-lead</span> and
+                <span class="who pm">product-mgr</span> disagree on
+                <strong>scope</strong> · <strong>timeline</strong> · <strong>quality</strong>
+              </div>
+            </div>
+            <div class="conflict-action">opening session…</div>
+          </div>
+          <div class="positions-head">recent positions</div>
+          <div id="pos-be" class="position-row be">
+            <div class="pos-avatar">BL</div>
+            <div>
+              <div class="pos-meta">
+                <span class="pos-who">backend-lead</span>
+                <span class="pos-key">decisions/migration</span>
+                <span class="pos-time">2m ago</span>
+              </div>
+              <div class="pos-text">Over-provision Postgres + read replicas from day one. Cost is worth the reliability headroom.</div>
+            </div>
+          </div>
+          <div id="pos-pm" class="position-row pm">
+            <div class="pos-avatar">PM</div>
+            <div>
+              <div class="pos-meta">
+                <span class="pos-who">product-mgr</span>
+                <span class="pos-key">context/timeline</span>
+                <span class="pos-time">1m ago</span>
+              </div>
+              <div class="pos-text">Demo in 4 weeks. Anything off the demo path is scope creep — re-platform after we close the round.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Right rail -->
+      <div class="dash-rail-r">
+        <div class="rail-header"><span>Activity</span><span class="count">live</span></div>
+        <div class="rail-body">
+          <div class="feed-item"><div class="feed-dot green"></div><div class="feed-body"><span class="ts">16:39:02</span><span class="who ce">cognitive-engine</span> opening session</div></div>
+          <div class="feed-item"><div class="feed-dot yellow"></div><div class="feed-body"><span class="ts">16:38:55</span>conflict on <strong>scope</strong>, <strong>timeline</strong></div></div>
+          <div class="feed-item"><div class="feed-dot purple"></div><div class="feed-body"><span class="ts">16:38:42</span><span class="who pm">product-mgr</span> wrote context/timeline</div></div>
+          <div class="feed-item"><div class="feed-dot accent"></div><div class="feed-body"><span class="ts">16:38:31</span><span class="who be">backend-lead</span> wrote decisions/migration</div></div>
+          <div class="feed-item"><div class="feed-dot muted"></div><div class="feed-body"><span class="ts">16:38:00</span>heartbeat run · 4 agents woke</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="v2-sub" class="callout-sub">system detects conflict · no manual session create</div>
+  </div>
+
+  <!-- ── 03 · Negotiate ── -->
+  <div id="v3" class="clip" data-start="18" data-duration="7" data-track-index="4">
+    <div class="scene-title">
+      <span class="num">03</span>
+      <span class="caption">Watch them work</span>
+    </div>
+    <div class="frame dash">
+      <!-- Left rail -->
+      <div class="dash-rail-l">
+        <div class="rail-header"><span>Agents</span><span class="count">4</span></div>
+        <div class="rail-body">
+          <div class="agent-row k-be active"><div class="av">BL</div><div class="info"><div class="name">backend-lead</div><div class="role">claude_local · reliability</div></div><div class="status-col"><div class="stat neg">negotiating</div><div class="burn">$2.40</div></div></div>
+          <div class="agent-row k-pm active"><div class="av">PM</div><div class="info"><div class="name">product-mgr</div><div class="role">openclaw · shipping speed</div></div><div class="status-col"><div class="stat neg">negotiating</div><div class="burn">$1.85</div></div></div>
+          <div class="agent-row k-design"><div class="av">DS</div><div class="info"><div class="name">design-lead</div><div class="role">claude_local · UX clarity</div></div><div class="status-col"><div class="stat task">task</div><div class="burn">$0.95</div></div></div>
+          <div class="agent-row k-ops"><div class="av">OP</div><div class="info"><div class="name">ops-lead</div><div class="role">openclaw · uptime first</div></div><div class="status-col"><div class="stat idle">idle</div><div class="burn">$0.20</div></div></div>
+        </div>
+      </div>
+      <!-- Main -->
+      <div class="dash-main">
+        <div class="room-header">
+          <div class="room-name"><span class="hash">#</span>sprint-plan</div>
+          <div class="room-goal">Plan the Q3 sprint priorities</div>
+          <div class="room-meta">
+            <span>session:<span class="v">scope-vs-timeline</span></span>
+            <span>memory:<span class="v">12 entries</span></span>
+            <span>agreements:<span class="v">1</span></span>
+          </div>
+        </div>
+        <div class="center-panel">
+          <div class="neg-header">
+            <span class="neg-pulse"></span>
+            <span class="neg-title">live negotiation</span>
+            <span class="neg-round">round<span class="v">3 / 8</span></span>
+          </div>
+          <div class="issues">
+            <div class="issue-row head">
+              <div class="cell">issue</div><div class="cell">backend-lead</div><div class="cell">product-mgr</div>
+            </div>
+            <div class="issue-row"><div class="cell lane">scope</div><div class="cell pos be">extended</div><div class="cell pos pm">minimal</div></div>
+            <div class="issue-row"><div class="cell lane">timeline</div><div class="cell pos be">8 weeks</div><div class="cell pos pm">4 weeks</div></div>
+            <div class="issue-row"><div class="cell lane">quality</div><div class="cell pos be">premium</div><div class="cell pos pm">standard</div></div>
+          </div>
+          <div class="current-offer">
+            <div class="head">
+              <span class="label">current offer</span>
+              <span class="who">proposed by product-mgr · round 3</span>
+            </div>
+            <div class="pairs">
+              <div class="pair"><span class="k">scope</span><span class="v">standard</span></div>
+              <div class="pair"><span class="k">timeline</span><span class="v">6 weeks</span></div>
+              <div class="pair"><span class="k">quality</span><span class="v">standard</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Right rail -->
+      <div class="dash-rail-r">
+        <div class="rail-header"><span>Activity</span><span class="count">live</span></div>
+        <div class="rail-body">
+          <div class="feed-item"><div class="feed-dot purple"></div><div class="feed-body"><span class="ts">16:42:08</span><span class="who pm">product-mgr</span> proposed scope=standard, timeline=6wk</div></div>
+          <div class="feed-item"><div class="feed-dot green"></div><div class="feed-body"><span class="ts">16:41:50</span><span class="who ce">cognitive-engine</span> routed tick → product-mgr</div></div>
+          <div class="feed-item"><div class="feed-dot accent"></div><div class="feed-body"><span class="ts">16:41:31</span><span class="who be">backend-lead</span> rejected current offer</div></div>
+          <div class="feed-item"><div class="feed-dot green"></div><div class="feed-body"><span class="ts">16:40:14</span>agreement: database-approach = postgres + replicas</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="v3-sub" class="callout-sub">CognitiveEngine mediates · propose · respond · converge</div>
+  </div>
+
+  <!-- ── 04 · Outcome ── -->
+  <div id="v4" class="clip" data-start="25" data-duration="7" data-track-index="5">
+    <div class="scene-title">
+      <span class="num">04</span>
+      <span class="caption">Agreement, then tasks</span>
+    </div>
+    <div class="outcome">
+      <div id="consensus" class="consensus">
+        <div class="head">
+          <div class="pulse"></div>
+          <div class="label">consensus reached</div>
+          <div class="round">round 5 · 2 agents</div>
+        </div>
+        <div class="agreement-row"><span class="k">scope</span><span class="v">standard</span></div>
+        <div class="agreement-row"><span class="k">timeline</span><span class="v">6 weeks</span></div>
+        <div class="agreement-row"><span class="k">quality</span><span class="v">premium</span></div>
+        <div class="agreement-row"><span class="k">written to</span><span class="v" style="font-family:'Geist Mono',monospace;font-size:15px">decisions/sprint-plan.md</span></div>
+      </div>
+      <div id="tasks" class="frame tasks-panel">
+        <h3>Auto-generated tasks <span class="sub">· from sprint-plan agreement</span></h3>
+        <div class="task-group be">
+          <div class="task-group-head"><span class="av">BL</span>backend-lead · 3 tasks</div>
+          <div class="task"><div class="task-check done"></div><div class="task-body done">Draft migration plan for new schema</div><div class="task-state done">done</div></div>
+          <div class="task"><div class="task-check"></div><div class="task-body">Set up read replicas on staging</div><div class="task-state doing">in progress</div></div>
+          <div class="task"><div class="task-check"></div><div class="task-body">Write integration tests for new endpoints</div><div class="task-state todo">todo</div></div>
+        </div>
+        <div class="task-group pm">
+          <div class="task-group-head"><span class="av">PM</span>product-mgr · 2 tasks</div>
+          <div class="task"><div class="task-check"></div><div class="task-body">Send sprint commitments to stakeholders</div><div class="task-state doing">in progress</div></div>
+          <div class="task"><div class="task-check"></div><div class="task-body">Schedule mid-sprint check-in</div><div class="task-state todo">todo</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="v4-sub" class="callout-sub">agreement persists · tasks spawn · agents execute</div>
+  </div>
+</div>
+
+<script src="mycelium-bg.js"></script>
+<script>
+window.__timelines = window.__timelines || {};
+const tl = gsap.timeline({ paused: true });
+
+// All scenes start hidden except intro
+gsap.set(['#v1','#v2','#v3','#v4'], { opacity: 0 });
+gsap.set(['#hire-card-1','#hire-card-2','#hire-bridge'], { opacity: 0, x: 60 });
+gsap.set('#hire-caret-2', { opacity: 0 });
+gsap.set('#conflict-banner', { opacity: 0, y: -10 });
+gsap.set('#consensus', { opacity: 0, scale: 0.96 });
+gsap.set('#tasks', { opacity: 0, x: 40 });
+
+// ── Intro (0–4s) ──
+tl.from('#i-eyebrow', { opacity: 0, y: -16, duration: 0.6, ease: 'power2.out' }, 0.3);
+tl.from('#i-title',   { opacity: 0, y: 36, duration: 0.8, ease: 'power3.out' }, 0.6);
+tl.from('#i-subhead', { opacity: 0, y: 24, duration: 0.7, ease: 'power2.out' }, 1.2);
+tl.to('#intro', { opacity: 0, duration: 0.6, ease: 'power2.in' }, 3.6);
+
+// ── 01 Hire (4–11s) — two agents on two different adapters ──
+tl.to('#v1', { opacity: 1, duration: 0.5 }, 4.0);
+
+// Type command 1: claude_local adapter
+const CMD1 = 'mycelium agent hire backend-lead --adapter claude_code';
+CMD1.split('').forEach((_, i) => {
+  const t = CMD1.slice(0, i + 1);
+  tl.call(() => { document.getElementById('hire-typed-1').textContent = t; }, null, 4.4 + i * 0.032);
+});
+// ok + first card materialize
+tl.to('#hl1-ok',     { opacity: 1, duration: 0.35, ease: 'back.out(1.4)' }, 6.3);
+tl.to('#hire-card-1', { opacity: 1, x: 0, duration: 0.55, ease: 'power3.out' }, 6.4);
+// Caret 1 hides, caret 2 shows for second prompt
+tl.to('#hire-caret-1', { opacity: 0, duration: 0.15 }, 6.9);
+tl.to('#hl2',          { opacity: 1, duration: 0.25 }, 7.0);
+tl.set('#hire-caret-2', { opacity: 1 }, 7.0);
+
+// Type command 2: openclaw_gateway adapter
+const CMD2 = 'mycelium agent hire product-mgr --adapter openclaw_gateway';
+CMD2.split('').forEach((_, i) => {
+  const t = CMD2.slice(0, i + 1);
+  tl.call(() => { document.getElementById('hire-typed-2').textContent = t; }, null, 7.1 + i * 0.032);
+});
+// ok + second card materialize
+tl.to('#hl2-ok',      { opacity: 1, duration: 0.35, ease: 'back.out(1.4)' }, 9.0);
+tl.to('#hire-card-2', { opacity: 1, x: 0, duration: 0.55, ease: 'power3.out' }, 9.1);
+// Caret 2 hides
+tl.to('#hire-caret-2', { opacity: 0, duration: 0.15 }, 9.6);
+
+// "Both agents joined" footer + bridge
+tl.to('#hl3-info',  { opacity: 1, duration: 0.4 }, 9.7);
+tl.to('#hire-bridge', { opacity: 1, x: 0, duration: 0.5, ease: 'power2.out' }, 9.8);
+tl.from('#v1-sub', { opacity: 0, y: 12, duration: 0.5 }, 10.1);
+// Fade out
+tl.to('#v1', { opacity: 0, duration: 0.5, ease: 'power2.in' }, 10.6);
+
+// ── 02 Settle in (11–18s) ──
+tl.to('#v2', { opacity: 1, duration: 0.5 }, 11.0);
+tl.from('#pos-be', { opacity: 0, x: -30, duration: 0.5, ease: 'power2.out' }, 11.6);
+tl.from('#pos-pm', { opacity: 0, x: -30, duration: 0.5, ease: 'power2.out' }, 12.2);
+tl.to('#conflict-banner', { opacity: 1, y: 0, duration: 0.5, ease: 'back.out(1.4)' }, 13.4);
+tl.from('#v2-sub', { opacity: 0, y: 12, duration: 0.5 }, 14.2);
+tl.to('#v2', { opacity: 0, duration: 0.5, ease: 'power2.in' }, 17.6);
+
+// ── 03 Negotiate (18–25s) ──
+tl.to('#v3', { opacity: 1, duration: 0.5 }, 18.0);
+tl.from('#v3-sub', { opacity: 0, y: 12, duration: 0.5 }, 19.2);
+tl.to('#v3', { opacity: 0, duration: 0.5, ease: 'power2.in' }, 24.6);
+
+// ── 04 Outcome (25–32s) ──
+tl.to('#v4', { opacity: 1, duration: 0.5 }, 25.0);
+tl.to('#consensus', { opacity: 1, scale: 1, duration: 0.7, ease: 'back.out(1.4)' }, 25.5);
+tl.to('#tasks', { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out' }, 26.2);
+tl.from('#v4-sub', { opacity: 0, y: 12, duration: 0.5 }, 27.2);
+
+// Hold + fade
+tl.to('#v4', { opacity: 0, duration: 0.8, ease: 'power2.in' }, 30.6);
+
+window.__timelines['main'] = tl;
+</script>
+</body>
+</html>

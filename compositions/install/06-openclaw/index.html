@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=1920, height=1080"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,600&family=IBM+Plex+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#0c0d10;font-family:'IBM Plex Sans',sans-serif;color:#eaeaea}
+:root{--bg:#0c0d10;--accent:#5dd4e0;--text:#eaeaea;--text2:#a8a6a0;--muted:#b8b5ae;--green:#34d399;--purple:#c084fc;--yellow:#fbbf24;--blue:#818cf8;--border:rgba(234,234,234,0.10);--border2:rgba(234,234,234,0.22)}
+#mycelium-bg{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.45;transform:scale(2)}
+.scene{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px 160px;gap:42px}
+.eyebrow{font-family:'Geist Mono',monospace;font-size:24px;font-weight:600;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent)}
+.step-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:96px;line-height:1;color:var(--text);text-align:center}
+.terminal{width:1500px;background:rgba(20,22,27,0.92);border:1px solid var(--border2);border-radius:14px;font-family:'Geist Mono',monospace;color:var(--text);font-size:26px;line-height:1.55;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.5)}
+.term-bar{display:flex;align-items:center;gap:12px;padding:16px 24px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)}
+.term-bar .dot{width:16px;height:16px;border-radius:50%}
+.dot.r{background:#ff6058}.dot.y{background:#ffbd2e}.dot.g{background:#28c941}
+.term-bar .title{margin-left:20px;color:var(--muted);font-size:17px;letter-spacing:0.12em;text-transform:uppercase}
+.term-body{padding:32px 44px;min-height:300px}
+.term-line{display:block;white-space:pre}
+.term-line.cmd{color:var(--text)}.term-line.cmd .prompt{color:var(--accent)}
+.term-line.out{color:var(--text2)}.term-line.ok{color:var(--green)}
+.term-line.dim{color:var(--muted)}.term-line.cyan{color:var(--accent)}.term-line.purple{color:var(--purple)}.term-line.blue{color:var(--blue)}
+.term-line .key{color:var(--accent)}.term-line .num{color:var(--purple);font-weight:600}.term-line .yellow{color:var(--yellow)}
+.term-line + .term-line{margin-top:6px}
+.subhead{font-size:30px;font-weight:400;line-height:1.4;color:var(--text2);text-align:center;max-width:1320px}
+.chat{width:1500px;background:rgba(20,22,27,0.92);border:1px solid var(--border2);border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.5);font-family:'IBM Plex Sans',sans-serif}
+.chat-bar{display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02);font-family:'Geist Mono',monospace;color:var(--muted);font-size:18px;letter-spacing:0.12em;text-transform:uppercase}
+.chat-bar .room{color:var(--accent)}
+.chat-body{padding:28px 36px;display:flex;flex-direction:column;gap:20px;min-height:380px}
+.msg{display:flex;gap:18px;align-items:flex-start}
+.avatar{width:48px;height:48px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-weight:700;font-size:20px;color:#0c0d10}
+.av-julia{background:var(--accent)}.av-selina{background:var(--purple)}.av-ce{background:var(--green)}.av-system{background:var(--muted)}
+.msg-who{font-family:'Geist Mono',monospace;font-size:20px;font-weight:600;letter-spacing:0.04em}
+.msg-who.julia{color:var(--accent)}.msg-who.selina{color:var(--purple)}.msg-who.ce{color:var(--green)}.msg-who.system{color:var(--muted)}
+.msg-text{font-size:24px;color:var(--text);line-height:1.5;margin-top:2px}
+.msg-meta{font-family:'Geist Mono',monospace;font-size:16px;color:var(--muted);margin-top:4px;letter-spacing:0.04em}
+.system-note{font-family:'Geist Mono',monospace;font-size:20px;color:var(--green);letter-spacing:0.06em;display:flex;align-items:center;gap:12px;padding:12px 0}
+.system-note::before{content:"●";color:var(--green)}
+.consensus-banner{width:1500px;padding:32px 40px;border:1px solid var(--green);border-radius:14px;background:rgba(52,211,153,0.08);box-shadow:0 30px 80px rgba(0,0,0,0.5)}
+.consensus-banner .head{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.consensus-banner .label{font-family:'Geist Mono',monospace;font-size:22px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:var(--green)}
+.consensus-banner .pulse{width:14px;height:14px;border-radius:50%;background:var(--green);box-shadow:0 0 16px var(--green)}
+.consensus-row{font-family:'Geist Mono',monospace;font-size:24px;line-height:1.6;display:flex;gap:16px;align-items:baseline}
+.consensus-row .k{color:var(--green);min-width:200px}.consensus-row .v{color:var(--text)}
+.rounds-grid{display:grid;grid-template-columns:1fr;gap:18px;width:1500px}
+.round-row{display:grid;grid-template-columns:160px 1fr 1fr;gap:24px;align-items:center;padding:18px 24px;background:rgba(20,22,27,0.85);border:1px solid var(--border);border-radius:12px;font-family:'Geist Mono',monospace;font-size:22px}
+.round-num{font-size:18px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted)}
+.round-num strong{color:var(--accent);font-size:32px;display:block;margin-top:2px}
+.round-cell{padding:8px 14px;border-radius:8px;border:1px solid var(--border)}
+.round-cell.julia{border-color:rgba(93,212,224,0.35);background:rgba(93,212,224,0.05)}
+.round-cell.selina{border-color:rgba(192,132,252,0.35);background:rgba(192,132,252,0.05)}
+.round-cell .label{font-size:14px;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:4px}
+.round-cell.julia .label{color:var(--accent)}.round-cell.selina .label{color:var(--purple)}
+.round-cell .text{font-size:20px;color:var(--text)}
+.round-cell .ok{color:var(--green);font-weight:600}
+.cta-row{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.cta{padding:18px 28px;border:1px solid var(--accent);border-radius:10px;background:rgba(56,189,248,0.06);color:var(--accent);font-family:'Geist Mono',monospace;font-size:26px;letter-spacing:0.04em}
+.cta.green{border-color:var(--green);background:rgba(52,211,153,0.06);color:var(--green)}
+.cta.purple{border-color:var(--purple);background:rgba(192,132,252,0.06);color:var(--purple)}</style></head>
+<body><div id="root" data-composition-id="main" data-start="0" data-duration="8" data-width="1920" data-height="1080">
+<canvas id="mycelium-bg" class="clip" data-start="0" data-duration="8" data-track-index="0"></canvas>
+<div id="scene" class="scene clip" data-start="0" data-duration="8" data-track-index="1">
+<div id="eyebrow" class="eyebrow">Step 06 · OpenClaw</div>
+<div id="title" class="step-title">Wire up OpenClaw</div>
+<div id="terminal" class="terminal">
+<div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="title">~ adapter</span></div>
+<div class="term-body">
+<div id="l1" class="term-line cmd"><span class="prompt">$</span> mycelium adapter add openclaw</div>
+<div id="l2" class="term-line dim">▸ Installing plugins: <span class="key">mycelium</span> + <span class="key">mycelium-channel</span></div>
+<div id="l3" class="term-line dim">▸ Hooks: bootstrap · knowledge-extract</div>
+<div id="l4" class="term-line ok">✓ adapter installed</div>
+<div id="l5" class="term-line cmd"><span class="prompt">$</span> openclaw gateway restart</div>
+<div id="l6" class="term-line ok">✓ gateway online · agents bound</div>
+</div></div>
+<div id="subhead" class="subhead">Two plugins. The mycelium plugin wakes agents on SSE coordination ticks. The mycelium-channel plugin turns rooms into an addressed message bus — agents @-mention each other without Discord or Slack.</div>
+</div></div>
+<script>
+window.__timelines=window.__timelines||{};
+const tl=gsap.timeline({paused:true});
+tl.from("#eyebrow",{opacity:0,y:-16,duration:0.5,ease:"power2.out"},0.1);
+tl.from("#title",{opacity:0,y:24,duration:0.6,ease:"power3.out"},0.3);
+tl.from("#terminal",{opacity:0,y:32,duration:0.7,ease:"power3.out"},0.9);
+tl.from("#l1",{opacity:0,duration:0.3},1.4);
+tl.from("#l2",{opacity:0,duration:0.3},2.1);
+tl.from("#l3",{opacity:0,duration:0.3},2.7);
+tl.from("#l4",{opacity:0,scale:0.94,duration:0.4,ease:"back.out(1.6)"},3.4);
+tl.from("#l5",{opacity:0,duration:0.3},4.2);
+tl.from("#l6",{opacity:0,scale:0.94,duration:0.4,ease:"back.out(1.6)"},4.9);
+tl.from("#subhead",{opacity:0,y:18,duration:0.55,ease:"power2.out"},5.7);
+window.__timelines["main"]=tl;
+</script>
+<script src="mycelium-bg.js"></script>
+</body></html>

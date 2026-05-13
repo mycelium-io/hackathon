@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1920, height=1080"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,600&family=IBM+Plex+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  margin: 0; width: 1920px; height: 1080px;
+  overflow: hidden; background: #0c0d10;
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: #eaeaea;
+}
+:root {
+  --bg: #0c0d10; --surface: #111216;
+  --border: rgba(234,234,234,0.10); --border2: rgba(234,234,234,0.22);
+  --accent: #5dd4e0; --text: #eaeaea; --text2: #a8a6a0; --muted: #b8b5ae;
+  --green: #34d399; --purple: #c084fc; --blue: #818cf8; --red: #f87171;
+}
+#mycelium-bg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 0; opacity: 0.4; transform: scale(2);
+}
+
+/* ── Scene 1: Intro ── */
+.scene-intro {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 36px; padding: 100px 160px;
+}
+.intro-eyebrow {
+  font-family: 'Geist Mono', monospace; font-size: 26px;
+  letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--accent); font-weight: 600;
+}
+.intro-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-weight: 600;
+  font-size: 132px; line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--text); text-align: center;
+}
+.intro-subhead {
+  font-size: 38px; font-weight: 400;
+  line-height: 1.4; color: var(--text2);
+  text-align: center; max-width: 1320px;
+}
+
+/* ── App chrome ── */
+.app { position: absolute; inset: 0; z-index: 2; }
+.grid-bg {
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(234,234,234,0.04) 1px, transparent 0);
+  background-size: 48px 48px;
+  opacity: 0.7;
+}
+.search {
+  position: absolute;
+  top: 56px; left: 56px;
+  width: 580px;
+  background: rgba(20, 22, 27, 0.92);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 18px 22px;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  z-index: 6;
+}
+.search.focused { border-color: var(--accent); }
+.search .icon { color: var(--muted); width: 24px; height: 24px; flex-shrink: 0; }
+.search-text {
+  flex: 1; font-size: 22px;
+  display: flex; align-items: center;
+}
+.search-text .placeholder { color: var(--muted); }
+.search-text .typed { color: var(--text); }
+.search-text .caret {
+  display: inline-block; width: 2px; height: 24px;
+  background: var(--accent); margin-left: 2px;
+  opacity: 0;
+}
+.search .kbd {
+  font-family: 'Geist Mono', monospace; font-size: 16px;
+  color: var(--muted); padding: 4px 12px;
+  border: 1px solid var(--border2); border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* ── Fake mouse cursor + click ripple ── */
+#cursor {
+  position: absolute;
+  top: 0; left: 0;
+  width: 28px; height: 28px;
+  z-index: 20;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+}
+#click-ripple {
+  position: absolute;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: var(--accent);
+  z-index: 19;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* ── Typeahead dropdown ── */
+.typeahead {
+  position: absolute;
+  top: 130px; left: 56px;
+  width: 580px;
+  background: rgba(20, 22, 27, 0.96);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  box-shadow: 0 24px 56px rgba(0,0,0,0.55);
+  padding: 8px;
+  z-index: 7;
+}
+.ta-label {
+  font-family: 'Geist Mono', monospace; font-size: 14px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 16px 8px;
+}
+.ta-item {
+  display: grid;
+  grid-template-columns: 14px auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 8px;
+}
+.ta-item.focused { background: rgba(255,255,255,0.05); }
+.ta-dot { width: 12px; height: 12px; border-radius: 50%; }
+.ta-item[data-kind="decisions"] .ta-dot { background: var(--accent); }
+.ta-item[data-kind="failed"]    .ta-dot { background: var(--red); }
+.ta-key {
+  font-family: 'Geist Mono', monospace;
+  font-size: 20px;
+  color: var(--text);
+}
+.ta-key .ns { color: var(--muted); }
+.ta-key mark { background: rgba(93,212,224,0.22); color: var(--accent); padding: 0; }
+.ta-desc {
+  font-size: 18px;
+  color: var(--text2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ta-desc mark { background: rgba(93,212,224,0.22); color: var(--accent); padding: 0; }
+.ta-kind {
+  font-family: 'Geist Mono', monospace; font-size: 13px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted);
+}
+
+.breadcrumb {
+  position: absolute;
+  top: 76px; right: 720px;
+  font-family: 'Geist Mono', monospace; font-size: 18px;
+  color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase;
+  display: flex; gap: 16px;
+}
+.breadcrumb .room { color: var(--accent); }
+.breadcrumb .count { color: var(--text); }
+
+/* ── Graph SVG ── */
+.graph-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.graph-wrap svg {
+  width: 1200px; height: 900px;
+}
+.edge {
+  stroke: rgba(168,166,160,0.16);
+  stroke-width: 1.8;
+  transition: stroke 0.4s, stroke-width 0.4s, opacity 0.4s;
+}
+.edge.hot {
+  stroke: rgba(168,166,160,0.6);
+  stroke-width: 2.4;
+}
+.edge.dim { opacity: 0.18; }
+.edge-label-g { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.edge-label-bg { fill: var(--bg); }
+.edge-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 16px;
+  fill: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-anchor: middle;
+  dominant-baseline: central;
+  font-weight: 600;
+}
+.node-g .node-bg {
+  fill: var(--surface);
+  stroke: var(--border2);
+  stroke-width: 2;
+  transition: stroke 0.3s, stroke-width 0.3s, opacity 0.3s;
+}
+.node-g .node-label {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 22px; font-weight: 500;
+  fill: var(--text2);
+}
+.node-g .node-ns {
+  font-family: 'Geist Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  fill: var(--muted);
+}
+.node-g.decisions .node-bg { stroke: var(--accent); }
+.node-g.failed    .node-bg { stroke: var(--red); }
+.node-g.work      .node-bg { stroke: var(--blue); }
+.node-g.status    .node-bg { stroke: var(--green); }
+.node-g.context   .node-bg { stroke: var(--purple); }
+.node-g.selected .node-bg { stroke-width: 3.5; }
+.node-g.selected .node-label { fill: var(--text); font-weight: 600; }
+.node-g.dim .node-bg { opacity: 0.28; }
+.node-g.dim .node-label, .node-g.dim .node-ns { opacity: 0.28; }
+
+/* ── Detail card ── */
+.detail {
+  position: absolute;
+  top: 56px; right: 56px; bottom: 56px;
+  width: 620px;
+  background: rgba(20, 22, 27, 0.96);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  z-index: 4;
+}
+.detail-header {
+  padding: 28px 32px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 14px;
+}
+.detail-pill {
+  font-family: 'Geist Mono', monospace; font-size: 16px;
+  padding: 6px 14px; border-radius: 6px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  font-weight: 600;
+  background: rgba(93,212,224,0.1);
+  color: var(--accent);
+  border: 1px solid rgba(93,212,224,0.3);
+}
+.detail-key {
+  padding: 22px 32px 8px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 36px;
+  color: var(--text);
+  letter-spacing: 0.01em;
+}
+.detail-key .ns { color: var(--muted); }
+.detail-meta {
+  padding: 0 32px 24px;
+  font-family: 'Geist Mono', monospace; font-size: 17px;
+  color: var(--muted); letter-spacing: 0.06em;
+  display: flex; gap: 26px;
+}
+.detail-meta .v { color: var(--text); margin-left: 6px; }
+.detail-body {
+  flex: 1;
+  padding: 28px 32px;
+  font-size: 22px; line-height: 1.55;
+  color: var(--text);
+  border-top: 1px solid var(--border);
+}
+.detail-section { margin-bottom: 28px; }
+.detail-section:last-child { margin-bottom: 0; }
+.detail-section h4 {
+  font-family: 'Geist Mono', monospace; font-size: 15px;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px; font-weight: 600;
+}
+.conn {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 16px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.015);
+  font-family: 'Geist Mono', monospace; font-size: 18px;
+  margin-bottom: 8px;
+}
+.conn:last-child { margin-bottom: 0; }
+.conn .dot { width: 12px; height: 12px; border-radius: 50%; }
+.conn[data-kind="decisions"] .dot { background: var(--accent); }
+.conn[data-kind="failed"]    .dot { background: var(--red); }
+.conn[data-kind="work"]      .dot { background: var(--blue); }
+.conn[data-kind="status"]    .dot { background: var(--green); }
+.conn[data-kind="context"]   .dot { background: var(--purple); }
+.conn .arrow {
+  font-family: 'Geist Mono', monospace; font-size: 15px;
+  padding: 4px 10px; background: rgba(255,255,255,0.04);
+  border-radius: 5px; letter-spacing: 0.12em;
+  color: var(--muted); font-weight: 600;
+}
+.conn .target { color: var(--text); }
+.conn .target .ns { color: var(--muted); }
+.tags { display: flex; gap: 10px; flex-wrap: wrap; }
+.tag {
+  font-family: 'Geist Mono', monospace; font-size: 16px;
+  padding: 6px 12px; border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+
+/* ── Callouts ── */
+.callout {
+  position: absolute;
+  left: 56px; bottom: 80px;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-weight: 600;
+  font-size: 64px; line-height: 1.1;
+  color: var(--text);
+  max-width: 820px;
+  z-index: 8;
+}
+.callout-sub {
+  position: absolute;
+  left: 56px; bottom: 50px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 18px; letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  z-index: 8;
+}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="28" data-width="1920" data-height="1080">
+  <canvas id="mycelium-bg" class="clip" data-start="0" data-duration="28" data-track-index="0"></canvas>
+
+  <!-- Scene 1: Intro -->
+  <div id="scene-intro" class="scene-intro clip" data-start="0" data-duration="5" data-track-index="1">
+    <div id="i-eyebrow" class="intro-eyebrow">Preview · What's Next</div>
+    <div id="i-title" class="intro-title">Knowledge Graph Explorer</div>
+    <div id="i-subhead" class="intro-subhead">Dive into and visualize the concepts, decisions, and relationships in your room's knowledge graph.</div>
+  </div>
+
+  <!-- Scene 2+: App view -->
+  <div id="app" class="app clip" data-start="4" data-duration="24" data-track-index="2">
+    <div id="grid-bg" class="grid-bg"></div>
+
+    <!-- Search bar with animated text + caret -->
+    <div id="search" class="search">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+      <span class="search-text">
+        <span id="search-placeholder" class="placeholder">search concepts, decisions, failures…</span>
+        <span id="search-typed" class="typed"></span><span id="search-caret" class="caret"></span>
+      </span>
+      <span class="kbd">⌘ K</span>
+    </div>
+
+    <!-- Typeahead dropdown -->
+    <div id="typeahead" class="typeahead">
+      <div class="ta-label">Matches</div>
+      <div id="ta-1" class="ta-item" data-kind="decisions">
+        <div class="ta-dot"></div>
+        <div class="ta-key"><span class="ns">decisions/</span>db</div>
+        <div class="ta-desc">AgensGraph + <mark>pg</mark>vector</div>
+        <div class="ta-kind">decision</div>
+      </div>
+      <div id="ta-2" class="ta-item" data-kind="failed">
+        <div class="ta-dot"></div>
+        <div class="ta-key"><span class="ns">failed/</span>sqlite</div>
+        <div class="ta-desc">No <mark>pg</mark>vector support</div>
+        <div class="ta-kind">failed</div>
+      </div>
+    </div>
+
+    <div id="breadcrumb" class="breadcrumb">
+      <span class="room">#hackathon-plan</span>
+      <span>·</span>
+      <span class="count">8 nodes · 11 edges</span>
+    </div>
+
+    <!-- Graph -->
+    <div class="graph-wrap">
+      <svg viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid meet">
+        <g id="edges"></g>
+        <g id="edge-labels"></g>
+        <g id="nodes"></g>
+      </svg>
+    </div>
+
+    <!-- Detail card -->
+    <aside id="detail" class="detail">
+      <div class="detail-header">
+        <span class="detail-pill">DECISION</span>
+      </div>
+      <div class="detail-key"><span class="ns">decisions/</span>db</div>
+      <div class="detail-meta">
+        <span>v<span class="v">2</span></span>
+        <span>by <span class="v">julia-agent</span></span>
+        <span>updated <span class="v">2026-05-03</span></span>
+      </div>
+      <div class="detail-body">
+        <div class="detail-section">
+          <h4>Content</h4>
+          <p>AgensGraph with pgvector — SQL, graph, and vector search in one Postgres-16 fork. Eliminates the need for a separate vector store.</p>
+        </div>
+        <div class="detail-section">
+          <h4>Connections · 4</h4>
+          <div class="conn" data-kind="context"><span class="dot"></span><span class="arrow">SHAPES</span><span class="target"><span class="ns">context/</span>goal</span></div>
+          <div class="conn" data-kind="decisions"><span class="dot"></span><span class="arrow">BACKS</span><span class="target"><span class="ns">decisions/</span>api</span></div>
+          <div class="conn" data-kind="failed"><span class="dot"></span><span class="arrow">REPLACES</span><span class="target"><span class="ns">failed/</span>sqlite</span></div>
+          <div class="conn" data-kind="work"><span class="dot"></span><span class="arrow">DRIVES</span><span class="target"><span class="ns">work/</span>migration</span></div>
+        </div>
+        <div class="detail-section">
+          <h4>Concepts</h4>
+          <div class="tags">
+            <span class="tag">pgvector</span>
+            <span class="tag">agensgraph</span>
+            <span class="tag">embeddings</span>
+            <span class="tag">cosine-similarity</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Click ripple + mouse cursor (z-index above typeahead) -->
+    <div id="click-ripple"></div>
+    <svg id="cursor" viewBox="0 0 24 24" fill="none">
+      <path d="M5 3 L5 19 L9 15 L11.5 20.5 L14 19.5 L11.5 14 L17 14 Z" fill="#eaeaea" stroke="#0c0d10" stroke-width="1.5" stroke-linejoin="round"/>
+    </svg>
+
+    <!-- Callouts -->
+    <div id="callout-search" class="callout">Find anything.</div>
+    <div id="callout-search-sub" class="callout-sub">Search concepts · failures · status</div>
+    <div id="callout-rel" class="callout">See how concepts connect.</div>
+    <div id="callout-rel-sub" class="callout-sub">Click · neighbors and relationships highlight</div>
+    <div id="callout-det" class="callout">Dive into the details.</div>
+    <div id="callout-det-sub" class="callout-sub">Provenance · content · links · concepts</div>
+  </div>
+</div>
+
+<script src="mycelium-bg.js"></script>
+<script>
+const NODES = [
+  { id: 'goal',     kind: 'context',   key: 'context/goal',         x: 700, y: 170, r: 76, label: 'MVP by Friday' },
+  { id: 'db',       kind: 'decisions', key: 'decisions/db',         x: 420, y: 410, r: 86, label: 'AgensGraph + pgvector' },
+  { id: 'auth',     kind: 'decisions', key: 'decisions/auth',       x: 980, y: 410, r: 84, label: 'JWT + refresh' },
+  { id: 'api',      kind: 'decisions', key: 'decisions/api',        x: 700, y: 460, r: 80, label: 'REST + OpenAPI' },
+  { id: 'sqlite',   kind: 'failed',    key: 'failed/sqlite',        x: 220, y: 680, r: 70, label: 'SQLite · rejected' },
+  { id: 'migration',kind: 'work',      key: 'work/migration',       x: 500, y: 720, r: 76, label: 'Migration 0042' },
+  { id: 'frontend', kind: 'work',      key: 'work/frontend',        x: 1160, y: 680, r: 78, label: 'Frontend integration' },
+  { id: 'api-ok',   kind: 'status',    key: 'status/api',           x: 900, y: 720, r: 70, label: 'API · PASSING' },
+];
+const EDGES = [
+  ['goal','db','SHAPES'], ['goal','auth','SHAPES'], ['goal','api','SHAPES'],
+  ['db','api','BACKS'], ['auth','api','GATES'],
+  ['db','sqlite','REPLACES'], ['db','migration','DRIVES'],
+  ['api','frontend','CONSUMED BY'], ['api','api-ok','PROVES'],
+  ['migration','api-ok','UNBLOCKS'], ['auth','frontend','INTEGRATES'],
+];
+
+const NS = 'http://www.w3.org/2000/svg';
+const nodeById = Object.fromEntries(NODES.map(n => [n.id, n]));
+const svgEdges = document.getElementById('edges');
+const svgEdgeLabels = document.getElementById('edge-labels');
+const svgNodes = document.getElementById('nodes');
+
+EDGES.forEach(([a, b, label], i) => {
+  const A = nodeById[a], B = nodeById[b];
+  const line = document.createElementNS(NS, 'line');
+  line.setAttribute('class', 'edge');
+  line.id = 'edge-' + i;
+  line.setAttribute('data-from', a); line.setAttribute('data-to', b);
+  line.setAttribute('x1', A.x); line.setAttribute('y1', A.y);
+  line.setAttribute('x2', B.x); line.setAttribute('y2', B.y);
+  svgEdges.appendChild(line);
+  const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
+  const g = document.createElementNS(NS, 'g');
+  g.setAttribute('class', 'edge-label-g');
+  g.id = 'edge-label-' + i;
+  g.setAttribute('transform', `translate(${mx},${my})`);
+  const w = label.length * 9 + 20;
+  const rect = document.createElementNS(NS, 'rect');
+  rect.setAttribute('class', 'edge-label-bg');
+  rect.setAttribute('x', -w/2); rect.setAttribute('y', -13);
+  rect.setAttribute('width', w); rect.setAttribute('height', 26);
+  rect.setAttribute('rx', 5);
+  const text = document.createElementNS(NS, 'text');
+  text.setAttribute('class', 'edge-label');
+  text.textContent = label;
+  g.appendChild(rect); g.appendChild(text);
+  svgEdgeLabels.appendChild(g);
+});
+
+NODES.forEach(n => {
+  const g = document.createElementNS(NS, 'g');
+  g.setAttribute('class', `node-g ${n.kind}`);
+  g.id = 'node-' + n.id;
+  g.setAttribute('transform', `translate(${n.x},${n.y})`);
+  const circle = document.createElementNS(NS, 'circle');
+  circle.setAttribute('class', 'node-bg');
+  circle.setAttribute('r', n.r);
+  g.appendChild(circle);
+  const words = n.label.split(' ');
+  let l1 = words.slice(0, Math.ceil(words.length / 2)).join(' ');
+  let l2 = words.slice(Math.ceil(words.length / 2)).join(' ');
+  if (!l2) l1 = n.label;
+  const twoLines = !!l2;
+  const nsH = 16, lineH = 26, gapNs = 14, gapLine = 6;
+  const totalH = nsH + gapNs + lineH + (twoLines ? gapLine + lineH : 0);
+  const top = -totalH / 2;
+  const ns = document.createElementNS(NS, 'text');
+  ns.setAttribute('class', 'node-ns');
+  ns.setAttribute('text-anchor', 'middle');
+  ns.setAttribute('dominant-baseline', 'central');
+  ns.setAttribute('y', top + nsH/2);
+  ns.textContent = n.kind;
+  g.appendChild(ns);
+  const t1 = document.createElementNS(NS, 'text');
+  t1.setAttribute('class', 'node-label');
+  t1.setAttribute('text-anchor', 'middle');
+  t1.setAttribute('dominant-baseline', 'central');
+  t1.setAttribute('y', top + nsH + gapNs + lineH/2);
+  t1.textContent = l1;
+  g.appendChild(t1);
+  if (twoLines) {
+    const t2 = document.createElementNS(NS, 'text');
+    t2.setAttribute('class', 'node-label');
+    t2.setAttribute('text-anchor', 'middle');
+    t2.setAttribute('dominant-baseline', 'central');
+    t2.setAttribute('y', top + nsH + gapNs + lineH + gapLine + lineH/2);
+    t2.textContent = l2;
+    g.appendChild(t2);
+  }
+  svgNodes.appendChild(g);
+});
+
+function highlightNeighbors(nodeId) {
+  const neighbors = new Set([nodeId]);
+  EDGES.forEach(([a, b]) => { if (a === nodeId) neighbors.add(b); if (b === nodeId) neighbors.add(a); });
+  NODES.forEach(n => {
+    const el = document.getElementById('node-' + n.id);
+    el.classList.toggle('selected', n.id === nodeId);
+    el.classList.toggle('dim', !neighbors.has(n.id));
+  });
+  EDGES.forEach(([a,b], i) => {
+    const e = document.getElementById('edge-' + i);
+    const lbl = document.getElementById('edge-label-' + i);
+    const incident = a === nodeId || b === nodeId;
+    e.classList.toggle('hot', incident);
+    e.classList.toggle('dim', !incident);
+    lbl.style.opacity = incident ? 1 : 0;
+  });
+}
+
+window.__timelines = window.__timelines || {};
+const tl = gsap.timeline({ paused: true });
+
+// Initial hidden states
+gsap.set('#app, #search, #breadcrumb, .graph-wrap, #typeahead, #detail, #callout-search, #callout-search-sub, #callout-rel, #callout-rel-sub, #callout-det, #callout-det-sub', { opacity: 0 });
+gsap.set('#typeahead', { y: -10 });
+gsap.set('#detail', { x: 80 });
+gsap.set('.node-g, .edge', { opacity: 0 });
+gsap.set('#search-placeholder', { opacity: 1 });
+gsap.set('#search-typed', { opacity: 0 });
+gsap.set('#search-caret', { opacity: 0 });
+gsap.set('#cursor', { x: 1700, y: 950, opacity: 0, scale: 1 });
+gsap.set('#click-ripple', { opacity: 0, scale: 0, xPercent: -50, yPercent: -50 });
+// Transform-origin on the typeahead area so we can zoom into it cleanly
+gsap.set('#app', { transformOrigin: '346px 200px' });
+
+// Helper: update the marked highlight in the typeahead descriptions to match
+// what the user has typed so far. mark covers the longest matching prefix.
+const TA_DESCS = {
+  'ta-1': 'AgensGraph + pgvector',
+  'ta-2': 'No pgvector support',
+};
+function updateMarks(query) {
+  if (!query) return;
+  const q = query.toLowerCase();
+  const targets = [
+    { el: document.getElementById('ta-1'), text: 'AgensGraph + pgvector' },
+    { el: document.getElementById('ta-2'), text: 'No pgvector support' },
+  ];
+  targets.forEach(({ el, text }) => {
+    const desc = el && el.querySelector('.ta-desc');
+    if (!desc) return;
+    const idx = text.toLowerCase().indexOf(q);
+    if (idx === -1) { desc.textContent = text; return; }
+    const before = text.slice(0, idx);
+    const match = text.slice(idx, idx + q.length);
+    const after = text.slice(idx + q.length);
+    desc.innerHTML = before + '<mark>' + match + '</mark>' + after;
+  });
+}
+
+// ── Scene 1 (0–4s): Intro ──
+tl.from('#i-eyebrow', { opacity: 0, y: -16, duration: 0.6, ease: 'power2.out' }, 0.3);
+tl.from('#i-title',   { opacity: 0, y: 36, duration: 0.8, ease: 'power3.out' }, 0.6);
+tl.from('#i-subhead', { opacity: 0, y: 24, duration: 0.7, ease: 'power2.out' }, 1.2);
+tl.to('#scene-intro', { opacity: 0, duration: 0.5, ease: 'power2.in' }, 3.6);
+
+// ── Scene 2 (4–6.5s): App reveal ──
+tl.to('#app', { opacity: 1, duration: 0.4 }, 4);
+tl.to('.graph-wrap', { opacity: 1, duration: 0.5 }, 4.1);
+tl.to('#search', { opacity: 1, duration: 0.5 }, 4.2);
+tl.to('#breadcrumb', { opacity: 1, duration: 0.5 }, 4.4);
+tl.to('.node-g', { opacity: 1, duration: 0.4, stagger: 0.04, ease: 'back.out(1.4)' }, 4.6);
+tl.to('.edge', { opacity: 1, duration: 0.6 }, 5.2);
+
+// ── Scene 3 (6.5–14.5s): Typeahead, zoomed in ──
+// Zoom in to the search/typeahead area (~1.4× around the search bar center)
+tl.to('#app', {
+  scale: 1.4,
+  x: 614, y: 340,
+  duration: 1.0,
+  ease: 'power3.inOut',
+}, 6.5);
+
+// Callout fades in alongside zoom
+tl.to('#callout-search',     { opacity: 1, duration: 0.6, ease: 'power2.out' }, 6.6);
+tl.to('#callout-search-sub', { opacity: 1, duration: 0.5 }, 6.8);
+
+// Search bar focuses, caret appears + blinks
+tl.to('#search', { borderColor: 'var(--accent)', duration: 0.3 }, 7.4);
+tl.set('#search-caret', { opacity: 1 }, 7.4);
+tl.to('#search-caret', { opacity: 0, duration: 0.4, repeat: 5, yoyo: true, ease: 'steps(1)' }, 7.6);
+
+// Placeholder fades, typing begins
+tl.to('#search-placeholder', { opacity: 0, duration: 0.2 }, 7.6);
+tl.to('#search-typed', { opacity: 1, duration: 0.05 }, 7.8);
+
+// Type "pgvector" — 0.16s per char (~1.3s for 8 chars)
+const PHRASE = 'pgvector';
+PHRASE.split('').forEach((_, i) => {
+  const typed = PHRASE.slice(0, i + 1);
+  tl.call(() => {
+    document.getElementById('search-typed').textContent = typed;
+    updateMarks(typed);
+  }, null, 7.8 + i * 0.16);
+});
+
+// Dropdown opens once "pg" has been typed (just after char index 1)
+tl.to('#typeahead', { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' }, 8.15);
+
+// Hold post-typing: user reads results
+// Mouse cursor flies in from off-screen toward the first result
+tl.to('#cursor', { opacity: 1, duration: 0.2 }, 9.4);
+tl.to('#cursor', {
+  x: 200, y: 215,
+  duration: 1.0,
+  ease: 'power2.inOut',
+}, 9.4);
+
+// Focus state highlights as the cursor arrives
+tl.call(() => { document.getElementById('ta-1').classList.add('focused'); }, null, 10.4);
+
+// Click ripple at the cursor position (ta-1 center is ~(346, 215))
+tl.set('#click-ripple', { x: 200, y: 215 }, 10.9);
+tl.to('#click-ripple', { opacity: 0.7, scale: 1, duration: 0.25, ease: 'power2.out' }, 10.9);
+tl.to('#click-ripple', { opacity: 0, scale: 1.8, duration: 0.4, ease: 'power2.out' }, 11.15);
+// Cursor click squish
+tl.to('#cursor', { scale: 0.85, duration: 0.12, yoyo: true, repeat: 1, ease: 'power2.out' }, 10.95);
+
+// Cursor exits
+tl.to('#cursor', { opacity: 0, duration: 0.3, ease: 'power2.in' }, 11.7);
+
+// Dropdown closes, search clears
+tl.to('#typeahead', { opacity: 0, y: -10, duration: 0.35, ease: 'power2.in' }, 11.5);
+tl.to('#search-caret', { opacity: 0, duration: 0.15 }, 11.6);
+tl.to('#search-typed', { opacity: 0, duration: 0.2 }, 11.7);
+tl.to('#search', { borderColor: 'var(--border2)', duration: 0.3 }, 11.7);
+tl.call(() => {
+  document.getElementById('search-typed').textContent = '';
+  document.getElementById('ta-1').classList.remove('focused');
+  // Reset marks to their default "pg" highlight for any future replays
+  updateMarks('pg');
+}, null, 12.0);
+tl.to('#search-placeholder', { opacity: 1, duration: 0.3 }, 12.0);
+
+// Search callout fades
+tl.to('#callout-search',     { opacity: 0, duration: 0.4, ease: 'power2.in' }, 12.2);
+tl.to('#callout-search-sub', { opacity: 0, duration: 0.4, ease: 'power2.in' }, 12.2);
+
+// Zoom out
+tl.to('#app', {
+  scale: 1, x: 0, y: 0,
+  duration: 1.0, ease: 'power3.inOut',
+}, 12.5);
+
+// ── Scene 4 (14–18s): Relationships ──
+tl.call(() => highlightNeighbors('db'), null, 13.8);
+tl.to('#callout-rel',     { opacity: 1, duration: 0.6, ease: 'power2.out' }, 14.0);
+tl.to('#callout-rel-sub', { opacity: 1, duration: 0.5 }, 14.2);
+
+// ── Scene 5 (18–26s): Detail card ──
+tl.to('#callout-rel',     { opacity: 0, duration: 0.4, ease: 'power2.in' }, 17.8);
+tl.to('#callout-rel-sub', { opacity: 0, duration: 0.4, ease: 'power2.in' }, 17.8);
+tl.to('#detail', { opacity: 1, x: 0, duration: 0.8, ease: 'power3.out' }, 18.1);
+tl.to('#callout-det',     { opacity: 1, duration: 0.6, ease: 'power2.out' }, 19.3);
+tl.to('#callout-det-sub', { opacity: 1, duration: 0.5 }, 19.5);
+
+// ── Scene 6 (26–28s): Fade out ──
+tl.to(['#app', '#scene-intro'], { opacity: 0, duration: 0.8, ease: 'power2.in' }, 26.5);
+
+window.__timelines['main'] = tl;
+</script>
+</body>
+</html>

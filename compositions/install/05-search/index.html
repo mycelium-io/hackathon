@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=1920, height=1080"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,600&family=IBM+Plex+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#0c0d10;font-family:'IBM Plex Sans',sans-serif;color:#eaeaea}
+:root{--bg:#0c0d10;--accent:#5dd4e0;--text:#eaeaea;--text2:#a8a6a0;--muted:#b8b5ae;--green:#34d399;--purple:#c084fc;--yellow:#fbbf24;--blue:#818cf8;--border:rgba(234,234,234,0.10);--border2:rgba(234,234,234,0.22)}
+#mycelium-bg{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.45;transform:scale(2)}
+.scene{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px 160px;gap:42px}
+.eyebrow{font-family:'Geist Mono',monospace;font-size:24px;font-weight:600;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent)}
+.step-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:96px;line-height:1;color:var(--text);text-align:center}
+.terminal{width:1500px;background:rgba(20,22,27,0.92);border:1px solid var(--border2);border-radius:14px;font-family:'Geist Mono',monospace;color:var(--text);font-size:26px;line-height:1.55;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.5)}
+.term-bar{display:flex;align-items:center;gap:12px;padding:16px 24px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)}
+.term-bar .dot{width:16px;height:16px;border-radius:50%}
+.dot.r{background:#ff6058}.dot.y{background:#ffbd2e}.dot.g{background:#28c941}
+.term-bar .title{margin-left:20px;color:var(--muted);font-size:17px;letter-spacing:0.12em;text-transform:uppercase}
+.term-body{padding:32px 44px;min-height:300px}
+.term-line{display:block;white-space:pre}
+.term-line.cmd{color:var(--text)}.term-line.cmd .prompt{color:var(--accent)}
+.term-line.out{color:var(--text2)}.term-line.ok{color:var(--green)}
+.term-line.dim{color:var(--muted)}.term-line.cyan{color:var(--accent)}.term-line.purple{color:var(--purple)}
+.term-line .key{color:var(--accent)}.term-line .num{color:var(--purple);font-weight:600}.term-line .yellow{color:var(--yellow)}
+.term-line + .term-line{margin-top:6px}
+.subhead{font-size:30px;font-weight:400;line-height:1.4;color:var(--text2);text-align:center;max-width:1320px}</style></head>
+<body><div id="root" data-composition-id="main" data-start="0" data-duration="7" data-width="1920" data-height="1080">
+<canvas id="mycelium-bg" class="clip" data-start="0" data-duration="7" data-track-index="0"></canvas>
+<div id="scene" class="scene clip" data-start="0" data-duration="7" data-track-index="1">
+<div id="eyebrow" class="eyebrow">Step 05 · Search</div>
+<div id="title" class="step-title">Search by meaning</div>
+<div id="terminal" class="terminal">
+<div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="title">~ memory search</span></div>
+<div class="term-body">
+<div id="l1" class="term-line cmd"><span class="prompt">$</span> mycelium memory search "what database decisions were made"</div>
+<div id="l2" class="term-line dim">  ──────────────────────────────────────────────</div>
+<div id="l3" class="term-line"><span class="num">0.91</span>  <span class="key">decisions/db</span></div>
+<div id="l4" class="term-line out">      PostgreSQL with pgvector</div>
+<div id="l5" class="term-line"><span class="num">0.74</span>  <span class="key">decisions/storage</span></div>
+<div id="l6" class="term-line out">      Markdown files on disk, indexed in pgvector</div>
+<div id="l7" class="term-line"><span class="num">0.62</span>  <span class="key">failed/sqlite</span></div>
+<div id="l8" class="term-line out">      Cant handle pgvector or JSONB</div>
+</div></div>
+<div id="subhead" class="subhead">Cosine similarity on local 384-dim embeddings. No API key. No external service.</div>
+</div></div>
+<script>
+window.__timelines=window.__timelines||{};
+const tl=gsap.timeline({paused:true});
+tl.from("#eyebrow",{opacity:0,y:-16,duration:0.5,ease:"power2.out"},0.1);
+tl.from("#title",{opacity:0,y:24,duration:0.6,ease:"power3.out"},0.3);
+tl.from("#terminal",{opacity:0,y:32,duration:0.7,ease:"power3.out"},0.9);
+tl.from("#l1",{opacity:0,duration:0.3},1.4);
+tl.from("#l2",{opacity:0,duration:0.2},2.0);
+tl.from("#l3",{opacity:0,x:-20,duration:0.35,ease:"power2.out"},2.3);
+tl.from("#l4",{opacity:0,duration:0.3},2.55);
+tl.from("#l5",{opacity:0,x:-20,duration:0.35,ease:"power2.out"},2.95);
+tl.from("#l6",{opacity:0,duration:0.3},3.2);
+tl.from("#l7",{opacity:0,x:-20,duration:0.35,ease:"power2.out"},3.6);
+tl.from("#l8",{opacity:0,duration:0.3},3.85);
+tl.from("#subhead",{opacity:0,y:18,duration:0.55,ease:"power2.out"},4.6);
+window.__timelines["main"]=tl;
+</script>
+<script src="mycelium-bg.js"></script>
+</body></html>

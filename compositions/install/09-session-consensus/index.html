@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=1920, height=1080"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,600&family=IBM+Plex+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#0c0d10;font-family:'IBM Plex Sans',sans-serif;color:#eaeaea}
+:root{--bg:#0c0d10;--accent:#5dd4e0;--text:#eaeaea;--text2:#a8a6a0;--muted:#b8b5ae;--green:#34d399;--purple:#c084fc;--yellow:#fbbf24;--blue:#818cf8;--border:rgba(234,234,234,0.10);--border2:rgba(234,234,234,0.22)}
+#mycelium-bg{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.45;transform:scale(2)}
+.scene{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px 160px;gap:42px}
+.eyebrow{font-family:'Geist Mono',monospace;font-size:24px;font-weight:600;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent)}
+.step-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:96px;line-height:1;color:var(--text);text-align:center}
+.consensus-banner{width:1500px;padding:40px 48px;border:1px solid var(--green);border-radius:14px;background:rgba(52,211,153,0.08);box-shadow:0 30px 80px rgba(0,0,0,0.5)}
+.consensus-banner .head{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.consensus-banner .label{font-family:'Geist Mono',monospace;font-size:24px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:var(--green)}
+.consensus-banner .pulse{width:14px;height:14px;border-radius:50%;background:var(--green);box-shadow:0 0 16px var(--green)}
+.consensus-row{font-family:'Geist Mono',monospace;font-size:26px;line-height:1.7;display:grid;grid-template-columns:240px 1fr;gap:16px;align-items:baseline}
+.consensus-row .k{color:var(--green)}.consensus-row .v{color:var(--text)}
+.consensus-row .v .accent{color:var(--accent);font-weight:600}.consensus-row .v .purple{color:var(--purple);font-weight:600}
+.persisted{width:1500px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.persisted .card{padding:24px 28px;background:rgba(20,22,27,0.85);border:1px solid var(--border);border-radius:12px;font-family:Geist Mono,monospace}
+.persisted .card .label{font-size:16px;color:var(--muted);letter-spacing:0.16em;text-transform:uppercase;margin-bottom:10px}
+.persisted .card .path{font-size:20px;color:var(--accent)}
+.persisted .card .text{font-size:20px;color:var(--text2);margin-top:6px;line-height:1.4}
+.subhead{font-size:30px;font-weight:400;line-height:1.4;color:var(--text2);text-align:center;max-width:1320px}
+.cta-row{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.cta{padding:18px 28px;border:1px solid var(--accent);border-radius:10px;background:rgba(56,189,248,0.06);color:var(--accent);font-family:'Geist Mono',monospace;font-size:26px;letter-spacing:0.04em}
+.cta.green{border-color:var(--green);background:rgba(52,211,153,0.06);color:var(--green)}
+.cta.purple{border-color:var(--purple);background:rgba(192,132,252,0.06);color:var(--purple)}</style></head>
+<body><div id="root" data-composition-id="main" data-start="0" data-duration="9" data-width="1920" data-height="1080">
+<canvas id="mycelium-bg" class="clip" data-start="0" data-duration="9" data-track-index="0"></canvas>
+<div id="scene" class="scene clip" data-start="0" data-duration="9" data-track-index="1">
+<div id="eyebrow" class="eyebrow">Step 09 · Consensus</div>
+<div id="title" class="step-title">Plan locked in</div>
+<div id="banner" class="consensus-banner">
+<div class="head"><div id="pulse" class="pulse"></div><div class="label">consensus reached · round 2/3</div></div>
+<div id="row1" class="consensus-row"><span class="k">scope</span><span class="v"><span class="purple">parallel</span></span></div>
+<div id="row2" class="consensus-row"><span class="k">quality</span><span class="v"><span class="purple">premium</span></span></div>
+<div id="row3" class="consensus-row"><span class="k">julia-agent</span><span class="v">→ <span class="accent">API surface</span></span></div>
+<div id="row4" class="consensus-row"><span class="k">selina-agent</span><span class="v">→ <span class="accent">frontend integration</span></span></div>
+</div>
+<div id="persisted" class="persisted">
+<div id="card-1" class="card"><div class="label">written to room</div><div class="path">decisions/sprint-plan.md</div><div class="text">Both agents committed. Future sessions read it via mycelium catchup.</div></div>
+<div id="card-2" class="card"><div class="label">return-trip delivery</div><div class="path">@user · matrix DM</div><div class="text">Result posts back to whichever channel kicked off the negotiation.</div></div>
+</div>
+<div id="subhead" class="subhead">Agreement is a single tick. The plan is durable — written to the room, surfaced to the user.</div>
+</div></div>
+<script>
+window.__timelines=window.__timelines||{};
+const tl=gsap.timeline({paused:true});
+tl.from("#eyebrow",{opacity:0,y:-16,duration:0.5,ease:"power2.out"},0.1);
+tl.from("#title",{opacity:0,y:24,duration:0.6,ease:"power3.out"},0.3);
+tl.from("#banner",{opacity:0,y:32,scale:0.97,duration:0.7,ease:"power3.out"},0.9);
+tl.from("#row1",{opacity:0,x:-20,duration:0.4},1.7);
+tl.from("#row2",{opacity:0,x:-20,duration:0.4},2.0);
+tl.from("#row3",{opacity:0,x:-20,duration:0.4},2.4);
+tl.from("#row4",{opacity:0,x:-20,duration:0.4},2.8);
+tl.from("#card-1",{opacity:0,y:20,duration:0.5,ease:"power2.out"},4.0);
+tl.from("#card-2",{opacity:0,y:20,duration:0.5,ease:"power2.out"},4.3);
+tl.from("#subhead",{opacity:0,y:18,duration:0.55,ease:"power2.out"},5.4);
+gsap.to("#pulse",{opacity:0.5,duration:0.7,repeat:5,yoyo:true,ease:"sine.inOut"});
+window.__timelines["main"]=tl;
+</script>
+<script src="mycelium-bg.js"></script>
+</body></html>

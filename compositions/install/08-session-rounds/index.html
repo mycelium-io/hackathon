@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=1920, height=1080"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,600&family=IBM+Plex+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#0c0d10;font-family:'IBM Plex Sans',sans-serif;color:#eaeaea}
+:root{--bg:#0c0d10;--accent:#5dd4e0;--text:#eaeaea;--text2:#a8a6a0;--muted:#b8b5ae;--green:#34d399;--purple:#c084fc;--yellow:#fbbf24;--blue:#818cf8;--border:rgba(234,234,234,0.10);--border2:rgba(234,234,234,0.22)}
+#mycelium-bg{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.45;transform:scale(2)}
+.scene{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 160px;gap:36px}
+.eyebrow{font-family:'Geist Mono',monospace;font-size:24px;font-weight:600;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent)}
+.step-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:88px;line-height:1;color:var(--text);text-align:center}
+.chat{width:1500px;background:rgba(20,22,27,0.92);border:1px solid var(--border2);border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.5);font-family:'IBM Plex Sans',sans-serif}
+.chat-bar{display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02);font-family:'Geist Mono',monospace;color:var(--muted);font-size:18px;letter-spacing:0.12em;text-transform:uppercase}
+.chat-bar .room{color:var(--accent)}
+.chat-body{padding:24px 32px;display:flex;flex-direction:column;gap:16px;min-height:340px}
+.msg{display:flex;gap:18px;align-items:flex-start}
+.avatar{width:48px;height:48px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-weight:700;font-size:18px;color:#0c0d10}
+.av-julia{background:var(--accent)}.av-selina{background:var(--purple)}.av-ce{background:var(--green)}.av-system{background:var(--muted)}
+.msg-body{flex:1}
+.msg-who{font-family:'Geist Mono',monospace;font-size:18px;font-weight:600;letter-spacing:0.04em}
+.msg-who.julia{color:var(--accent)}.msg-who.selina{color:var(--purple)}.msg-who.ce{color:var(--green)}.msg-who.system{color:var(--muted)}
+.msg-text{font-size:24px;color:var(--text);line-height:1.45;margin-top:4px}
+.system-row{padding:14px 18px;border-radius:10px;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.25);color:var(--green);font-family:'Geist Mono',monospace;font-size:20px;letter-spacing:0.06em;display:flex;align-items:center;gap:14px}
+.system-row::before{content:"●";color:var(--green);font-size:18px}
+.subhead{font-size:30px;font-weight:400;line-height:1.4;color:var(--text2);text-align:center;max-width:1320px}</style></head>
+<body><div id="root" data-composition-id="main" data-start="0" data-duration="11" data-width="1920" data-height="1080">
+<canvas id="mycelium-bg" class="clip" data-start="0" data-duration="11" data-track-index="0"></canvas>
+<div id="scene" class="scene clip" data-start="0" data-duration="11" data-track-index="1">
+<div id="eyebrow" class="eyebrow">Step 08 · Rounds</div>
+<div id="title" class="step-title">The CognitiveEngine mediates</div>
+<div id="chat" class="chat">
+<div class="chat-bar"><span>#</span><span class="room">hackathon-plan</span><span style="margin-left:auto">round 2/3 · negotiating</span></div>
+<div class="chat-body" style="min-height:460px">
+<div id="r1" class="msg"><div class="avatar av-ce">CE</div><div class="msg-body"><div class="msg-who ce">@cognitive-engine → julia</div><div class="msg-text" style="font-family:Geist Mono,monospace;font-size:20px;color:var(--text2)">tick · action: <span style="color:var(--accent)">propose</span></div></div></div>
+<div id="r2" class="msg"><div class="avatar av-julia">J</div><div class="msg-body"><div class="msg-who julia">@julia-agent</div><div class="msg-text" style="font-family:Geist Mono,monospace;font-size:22px">scope=<span style="color:var(--accent)">api-first</span> · quality=<span style="color:var(--accent)">standard</span></div></div></div>
+<div id="r3" class="msg"><div class="avatar av-ce">CE</div><div class="msg-body"><div class="msg-who ce">@cognitive-engine → selina</div><div class="msg-text" style="font-family:Geist Mono,monospace;font-size:20px;color:var(--text2)">tick · action: <span style="color:var(--purple)">respond</span> · current_offer attached</div></div></div>
+<div id="r4" class="msg"><div class="avatar av-selina">S</div><div class="msg-body"><div class="msg-who selina">@selina-agent</div><div class="msg-text" style="font-family:Geist Mono,monospace;font-size:22px">reject · counter scope=<span style="color:var(--purple)">parallel</span> · quality=<span style="color:var(--purple)">premium</span></div></div></div>
+<div id="r5" class="msg"><div class="avatar av-julia">J</div><div class="msg-body"><div class="msg-who julia">@julia-agent</div><div class="msg-text" style="font-family:Geist Mono,monospace;font-size:22px;color:var(--green)">accept</div></div></div>
+</div></div>
+<div id="subhead" class="subhead">Agents never free-chat decisions. CE assigns proposer/respondent each round and routes structured offers through the SAO protocol until everyone agrees.</div>
+</div></div>
+<script>
+window.__timelines=window.__timelines||{};
+const tl=gsap.timeline({paused:true});
+tl.from("#eyebrow",{opacity:0,y:-16,duration:0.5,ease:"power2.out"},0.1);
+tl.from("#title",{opacity:0,y:24,duration:0.6,ease:"power3.out"},0.3);
+tl.from("#chat",{opacity:0,y:32,duration:0.7,ease:"power3.out"},0.9);
+tl.from("#r1",{opacity:0,duration:0.3},1.5);
+tl.from("#r2",{opacity:0,x:-20,duration:0.4,ease:"power2.out"},2.4);
+tl.from("#r3",{opacity:0,duration:0.3},3.6);
+tl.from("#r4",{opacity:0,x:20,duration:0.4,ease:"power2.out"},4.6);
+tl.from("#r5",{opacity:0,scale:0.94,duration:0.4,ease:"back.out(1.6)"},5.9);
+tl.from("#subhead",{opacity:0,y:18,duration:0.55,ease:"power2.out"},7.0);
+window.__timelines["main"]=tl;
+</script>
+<script src="mycelium-bg.js"></script>
+</body></html>
